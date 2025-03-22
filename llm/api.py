@@ -4,8 +4,9 @@ from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, MessagesState, StateGraph
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, SystemMessage, trim_messages
 from langgraph.graph.message import add_messages
+import streamlit as st
 
 from typing import Sequence
 from typing_extensions import Annotated, TypedDict
@@ -39,41 +40,46 @@ class LLM:
                     "system",
                     """You are a helpful assistant with knowledge about Tolvera. Tölvera is a Python library designed for composing together and interacting with basal agencies, inspired by fields such as artificial life (ALife) and self-organising systems. It provides creative coding-style APIs that allow users to combine and compose various built-in behaviours, such as flocking, slime mold growth, and swarming, and also author their own.
 
-                    Overview of Features : 
-tv.v: a collection of "vera" (beings) including Move, Flock, Slime and Swarm, with more being continuously added. Vera can be combined and composed in various ways.
-tv.p: extensible particle system. Particles are divided into multiple species, where each species has a unique relationship with every other species, including itself
-tv.s: n-dimensional state structures that can be used by "vera", including built-in OSC and IML creation (see below).
-tv.px: drawing library including various shapes and blend modes, styled similarly to p5.js etc.
-tv.osc: Open Sound Control (OSC) via iipyper, including automated export of OSC schemas to JSON, XML, Pure Data (Pd), Max/MSP (SuperCollider TBC).
-tv.iml: Interactive Machine Learning via anguilla.
-tv.ti: Taichi-based simulation and rendering engine. Can be run "headless" (without graphics).
-tv.cv: computer vision integration based on OpenCV and Mediapipe.
-
 Your task is to generate tolvera code according to the user's query.""",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
         )
 
+        self.trimmer = trim_messages(
+            max_tokens=10000,
+            strategy="last",
+            token_counter=self.model,
+            include_system=True,
+            allow_partial=False,
+            start_on="human",
+        )
+
 
     def call_model(self, state: State):
-        prompt = self.prompt_template.invoke(state)
+        trimmed_messages = self.trimmer.invoke(state["messages"])
+        # trimmed_messages = state["messages"]
+        prompt = self.prompt_template.invoke(
+            {"messages": trimmed_messages}
+        )
         response = self.model.invoke(prompt)
         return {"messages": [response]}
     
 
     def generate_response(self, query: str):
         input_messages = [HumanMessage(query)]
-        output = self.app.invoke(
+
+        for chunk, metadata in self.app.stream(
             {"messages": input_messages},
             self.config,
-        )
-
-        return output["messages"][-1]
+            stream_mode="messages",
+        ):
+            if isinstance(chunk, AIMessage):
+                yield chunk.content
     
 
 if __name__ == "__main__":
     llm = LLM()
     query = "What is Tolvera?"
-    response = llm.generate_response(query)
-    print(response.content)
+    response = "".join(llm.generate_response(query))
+    print(response)
