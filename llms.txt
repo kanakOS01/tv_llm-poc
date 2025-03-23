@@ -1,0 +1,23 @@
+# Tölvera
+
+> Tölvera is a Python library for simulating and interacting with artificial life. It allows users to create and control digital agents that behave like flocks, swarms, or growing patterns. Tölvera can be used for artistic projects, music performances, and interactive installations. It supports real-time interaction and connects easily with other creative tools. The library runs efficiently using parallel computing and is designed for experimentation.
+
+Here is an overview of the features:
+
+- **tv.v**: a collection of "vera" (beings) including Move, Flock, Slime and Swarm. Vera can be combined and composed in various ways.
+- **tv.p**: extensible particle system. Particles are divided into multiple species, where each species has a unique relationship with every other species, including itself.
+- **tv.s**: n-dimensional state structures that can be used by "vera", including built-in OSC and IML creation.
+- **tv.px**: drawing library including various shapes and blend modes, styled similarly to p5.js.
+- **tv.osc**: Open Sound Control (OSC) via `iipyper`, including automated export of OSC schemas to JSON, XML, Pure Data (Pd), Max/MSP (SuperCollider TBC).
+- **tv.iml**: Interactive Machine Learning via `anguilla`.
+- **tv.ti**: Taichi-based simulation and rendering engine. Can be run "headless" (without graphics).
+- **tv.cv**: computer vision integration based on OpenCV and Mediapipe.
+
+## Resources
+
+- [API Reference](https://afhverjuekki.github.io/tolvera/apilist.txt): A list of all modules and their functions and methods in Tölvera.
+- [Examples](https://github.com/Intelligent-Instruments-Lab/iil-examples/tree/main/tolvera): A list of examples made using Tölvera
+
+## Optional
+
+- [Taichi Docs](https://docs.taichi-lang.org/): Taichi docs

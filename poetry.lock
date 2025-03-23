@@ -107,6 +107,21 @@ files = [
 ]
 
 [[package]]
+name = "astroid"
+version = "3.3.9"
+description = "An abstract syntax tree for Python with inference support."
+optional = false
+python-versions = ">=3.9.0"
+groups = ["main"]
+files = [
+    {file = "astroid-3.3.9-py3-none-any.whl", hash = "sha256:d05bfd0acba96a7bd43e222828b7d9bc1e138aaeb0649707908d3702a9831248"},
+    {file = "astroid-3.3.9.tar.gz", hash = "sha256:622cc8e3048684aa42c820d9d218978021c3c3d174fb03a9f0d615921744f550"},
+]
+
+[package.dependencies]
+typing-extensions = {version = ">=4.0.0", markers = "python_version < \"3.11\""}
+
+[[package]]
 name = "asttokens"
 version = "3.0.0"
 description = "Annotate AST trees with source code positions"
@@ -712,6 +727,24 @@ numpy = ">=1.25.0,<3.0"
 packaging = "*"
 
 [[package]]
+name = "fastcore"
+version = "1.8.0"
+description = "Python supercharged for fastai development"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "fastcore-1.8.0-py3-none-any.whl", hash = "sha256:67739747f0f714d02944957271a11dcb4a9dd40012615e6f9d19add3e5d9e041"},
+    {file = "fastcore-1.8.0.tar.gz", hash = "sha256:d23e63aff4bcd06dde24cdf9f7ea13c48e7d274ae89e52e826df33c64869c976"},
+]
+
+[package.dependencies]
+packaging = "*"
+
+[package.extras]
+dev = ["llms-txt", "matplotlib", "nbclassic", "nbdev (>=0.2.39)", "numpy", "pandas", "pillow", "plum-dispatch", "pysymbol_llm", "torch"]
+
+[[package]]
 name = "filelock"
 version = "3.18.0"
 description = "A platform independent file lock."
@@ -1227,8 +1260,8 @@ files = [
 jaxlib = "0.5.3"
 ml_dtypes = ">=0.4.0"
 numpy = [
-    {version = ">=1.25"},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.25"},
 ]
 opt_einsum = "*"
 scipy = ">=1.11.1"
@@ -1828,6 +1861,22 @@ doc = ["myst-parser", "sphinx", "sphinx-book-theme"]
 test = ["coverage", "pytest", "pytest-cov"]
 
 [[package]]
+name = "llms-txt"
+version = "0.0.4"
+description = "The /llms.txt file, helping language models use your website"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "llms-txt-0.0.4.tar.gz", hash = "sha256:3e4f5f52c39a7fe2352756e3cfc5f9e1098389cca42a27f64704f26f167a91c0"},
+    {file = "llms_txt-0.0.4-py3-none-any.whl", hash = "sha256:16bbb8947c46ba634d23887291f9ce0253e905a6ac8f8c99f46eed86a656af65"},
+]
+
+[package.dependencies]
+fastcore = ">=1.7.3"
+httpx = "*"
+
+[[package]]
 name = "lz4"
 version = "4.4.3"
 description = "LZ4 Bindings for Python"
@@ -2179,9 +2228,9 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.21.2", markers = "python_version >= \"3.10\""},
-    {version = ">=1.23.3", markers = "python_version >= \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.3", markers = "python_version >= \"3.11\""},
+    {version = ">=1.21.2", markers = "python_version >= \"3.10\""},
 ]
 
 [package.extras]
@@ -2625,10 +2674,10 @@ files = [
 
 [package.dependencies]
 numpy = [
+    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.5", markers = "python_version >= \"3.11\""},
     {version = ">=1.21.4", markers = "python_version >= \"3.10\" and platform_system == \"Darwin\""},
     {version = ">=1.21.2", markers = "platform_system != \"Darwin\" and python_version >= \"3.10\""},
-    {version = ">=1.23.5", markers = "python_version >= \"3.11\""},
-    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
 ]
 
 [[package]]
@@ -2650,10 +2699,10 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.21.4", markers = "python_version >= \"3.10\" and platform_system == \"Darwin\""},
-    {version = ">=1.21.2", markers = "platform_system != \"Darwin\" and python_version >= \"3.10\""},
-    {version = ">=1.23.5", markers = "python_version >= \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.5", markers = "python_version == \"3.11\""},
+    {version = ">=1.21.4", markers = "python_version == \"3.10\" and platform_system == \"Darwin\""},
+    {version = ">=1.21.2", markers = "platform_system != \"Darwin\" and python_version == \"3.10\""},
 ]
 
 [[package]]
@@ -2823,9 +2872,9 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.22.4", markers = "python_version < \"3.11\""},
-    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
+    {version = ">=1.22.4", markers = "python_version < \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -3390,6 +3439,22 @@ files = [
 
 [package.extras]
 diagrams = ["jinja2", "railroad-diagrams"]
+
+[[package]]
+name = "pysymbol-llm"
+version = "0.0.5"
+description = "Generate manifest of public symbols win python projects w/docstrings"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "pysymbol-llm-0.0.5.tar.gz", hash = "sha256:579d0d3d37ed391f228aa8cebc97792b790769672605a7f993b5813734d426b4"},
+    {file = "pysymbol_llm-0.0.5-py3-none-any.whl", hash = "sha256:d37db0d94d70fa0902065c77df463169e31fa388cfbf4f88c0495b93e2445aa6"},
+]
+
+[package.dependencies]
+astroid = "*"
+fastcore = "*"
 
 [[package]]
 name = "python-dateutil"
@@ -5083,4 +5148,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "0d4d53532ddbad2ff5f1de477e56821ca3af8bcfef4c071d30ce8b2041e53676"
+content-hash = "0444aa9583b88cd95fa48b4fb267eae61c8daa5d1785bb54241e189cfafd41bb"

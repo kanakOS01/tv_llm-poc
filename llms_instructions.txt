@@ -1,0 +1,5 @@
+`llms_txt2ctx llms.txt --save_nbdev_fname llms-ctx.txt`
+- use this command to generate the ctx file
+
+`pysym2md tolvera --output_file apilist.txt`
+- use this for apilist

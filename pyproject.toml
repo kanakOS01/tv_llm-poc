@@ -14,7 +14,9 @@ dependencies = [
     "langchain[openai] (>=0.3.20,<0.4.0)",
     "langgraph (>=0.3.11,<0.4.0)",
     "ipykernel (>=6.29.5,<7.0.0)",
-    "tolvera (>=0.1.0rc15.post1,<0.2.0)"
+    "tolvera (>=0.1.0rc15.post1,<0.2.0)",
+    "llms-txt (>=0.0.4,<0.0.5)",
+    "pysymbol-llm (>=0.0.5,<0.0.6)"
 ]
 
 [tool.poetry]

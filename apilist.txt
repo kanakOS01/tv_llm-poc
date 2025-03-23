@@ -1,0 +1,2983 @@
+# tolvera Module Documentation
+
+## tolvera.__main__
+
+> Tölvera command line interface.
+
+- `def help()`
+    Print help message.
+
+- `def demo(**kwargs)`
+    Run a simple demo.
+    
+    Args:
+        **kwargs: Keyword arguments for Tölvera.
+
+- `def main(**kwargs)`
+    Run Tölvera with kwargs.
+    
+    Args:
+        **kwargs: Keyword arguments for Tolvera (see help()).
+
+## tolvera.context
+
+> `TolveraContext` is a shared context or environment for `Tolvera` instances.
+> It is created automatically when a `Tolvera` instance is created, if one 
+> does not already exist. It manages the integration of packages for graphics, 
+> computer vision, communications protocols, and more. If multiple `Tolvera` 
+> instances are created, they must share the same `TolveraContext`.
+> 
+> 
+> Example:
+>     `TolveraContext` can be created manually, and shared with multiple `Tolvera`
+>     instances. Note that only one `render` function can be used at a time.
+>     ```py
+>     from tolvera import TolveraContext, Tolvera, run
+> 
+>     def main(**kwargs):
+>         ctx = TolveraContext(**kwargs)
+> 
+>         tv1 = Tolvera(ctx=ctx, **kwargs)
+>         tv2 = Tolvera(ctx=ctx, **kwargs)
+> 
+>         @tv1.render
+>         def _():
+>             return tv2.px
+> 
+>     if __name__ == '__main__':
+>         run(main)
+>     ```
+> 
+> Example:
+>     `TolveraContext` can also be created automatically, and still shared.
+>     ```py
+>     from tolvera import Tolvera, run
+> 
+>     def main(**kwargs):
+>         tv1 = Tolvera(**kwargs)
+>         tv2 = Tolvera(ctx=tv1.ctx, **kwargs)
+> 
+>         @tv1.render
+>         def _():
+>             return tv2.px
+> 
+>     if __name__ == '__main__':
+>         run(main)
+>     ```
+
+- `class TolveraContext`
+    Context for sharing between multiple Tölvera instances.
+    Context includes Taichi, OSC, IML and CV.
+    All Tölvera instances share the same context and are managed as a dict.
+
+    Attributes:
+        kwargs (dict): Keyword arguments for context.
+        name (str): Name of context.
+        name_clean (str): 'Cleaned' name of context.
+        i (int): Frame counter.
+        x (int): Width of canvas.
+        y (int): Height of canvas.
+        ti (Taichi): Taichi instance.
+        canvas (Pixels): Pixels instance.
+        osc (OSC): OSC instance.
+        iml (IML): IML instance.
+        cv (CV): CV instance.
+        _cleanup_fns (list): List of cleanup functions.
+        tolveras (dict): Dict of Tölvera instances.
+
+    - `def __init__(self, **kwargs)`
+        Initialise Tölvera context with given keyword arguments.
+
+    - `def init(self, **kwargs)`
+        Initialise wrapped external packages with given keyword arguments.
+        This only happens once when Tölvera is first initialised.
+
+        Args:
+            x (int): Width of canvas. Default: 1920.
+            y (int): Height of canvas. Default: 1080.
+            osc (bool): Enable OSC. Default: False.
+            iml (bool): Enable IML. Default: False.
+            cv (bool): Enable CV. Default: False.
+            see also kwargs for Taichi, OSC, IMLDict, and CV.
+
+    - `def run(self, f, **kwargs)`
+        Run Tölvera with given render function and keyword arguments.
+        This function will run inside a locked thread until KeyboardInterrupt/exit.
+        It runs the render function, updates the OSC map (if enabled), and shows the pixels.
+
+        Args:
+            f: Function to run.
+            **kwargs: Keyword arguments for function.
+
+    - `def step(self, f, **kwargs)`
+    - `def stop(self)`
+        Run cleanup functions and exit.
+
+    - `def render(self, f, **kwargs)`
+        Render Tölvera with given function and keyword arguments.
+
+        Args:
+            f (function, optional): Function to run. Defaults to None.
+
+    - `def cleanup(self, f)`
+        Decorator for cleanup functions based on iipyper.
+        Make functions run on KeyBoardInterrupt (before exit).
+        Cleanup functions must be defined before render is called!
+
+        Args:
+            f: Function to cleanup.
+
+        Returns:
+            Decorator function if f is None, else decorated function.
+
+    - `def add(self, tolvera)`
+        Add Tölvera to context.
+
+        Args:
+            tolvera (Tolvera): Tölvera to add.
+
+    - `def get_by_name(self, name)`
+        Get Tölvera by name.
+
+        Args:
+            name (str): Name of Tölvera to get.
+
+        Returns:
+            Tölvera: Tölvera with given name.
+
+    - `def get_names(self)`
+        Get names of all Tölveras in context.
+
+        Returns:
+            list: List of Tölvera names.
+
+    - `def remove(self, name)`
+        Remove Tölvera by name.
+
+        Args:
+            name (str): Name of Tölvera to delete.
+
+
+## tolvera.cv
+
+- `@ti.data_oriented class CV`
+    - `def __init__(self, context, **kwargs)`
+    - `def capture_init(self, filename)`
+    - `def capture_read(self)`
+    - `def threshold(self, img, thresh, max, threshold_type)`
+    - `def find_contours(self, thresh)`
+    - `def approx_poly_dp(self, contours, epsilon)`
+    - `def draw_contours(self, contours, color, thickness)`
+    - `def gaussian_blur(self, img, ksize, sigmaX)`
+    - `def resize(self, img, dsize, interpolation)`
+    - `def pyr_down(self, img, factor)`
+    - `def pyr_up(self, img, factor)`
+    - `def bgr_to_gray(self, img)`
+    - `def gray_to_bgr(self, img)`
+    - `def invert(self, img)`
+    - `def abs_diff(self, a, b)`
+    - `@ti.kernel def cv_to_px(self, f)`
+    - `@ti.kernel def px_to_cv(self, px_rgb)`
+    - `@ti.kernel def img_to_px(self, img)`
+    - `def process(self)`
+    - `def cleanup(self)`
+    - `def __call__(self, *args, **kwargs)`
+
+## tolvera.dualsense
+
+> TODO: SignalFlow microphone and speaker demo
+> TODO: List available output methods for LEDs, rumble, etc.
+
+- `class DualSense`
+    - `def __init__(self, **kwargs)`
+    - `def init(self, **kwargs)`
+    - `def start(self)`
+    - `def stop(self)`
+    - `def update(self)`
+    - `def on_exception(self, exception)`
+    - `def handle(self, event_type)`
+        Decorator for handling DualSense events.
+        It has a 'type' argument where you specify the event type.
+        For event types, see:
+        https://github.com/yesbotics/dualsense-controller-python/blob/main/src/examples/example.py
+        https://github.com/yesbotics/dualsense-controller-python/blob/main/src/dualsense_controller/core/state/read_state/value_type.py
+        To list available inputs, use `list_inputs()`.
+
+        Args:
+            event_type (str): The event type.
+
+        Example:
+            ```py
+            @ds.handle('left_stick')
+            def _(left_stick):
+                print(left_stick) # JoyStick(x=0.0, y=0.0)
+            ```
+
+    - `def list_defaults(self)`
+    - `def list_inputs(self)`
+
+## tolvera.iml
+
+> IML stands for Interactive Machine Learning. Tölvera wraps the 
+> [anguilla](https://intelligent-instruments-lab.github.io/anguilla/) package
+> to provide convenient ways for quickly creating mappings between vectors, functions
+> and OSC routes. 
+> 
+> Every Tölvera instance has an IMLDict, which is a dictionary of IML instances.
+> The IMLDict is accessible via the `iml` attribute of a Tölvera instance, and can
+> be used to create and access IML instances.
+> 
+> There are 9 IML types, which are listed below.
+> 
+> Example:
+>     Here we create a mapping based on states created by `tv.v.flock`,
+>     where the per-particle state `flock_p` is mapped to the species rule matrix `flock_s`.
+>     Since this is a `fun2fun` mapping (see IML Types below), we provide input and output 
+>     functions, and Tölvera updates the mapping automatically every `render()` call.
+>     ```py
+>     from tolvera import Tolvera, run
+> 
+>     def main(**kwargs):
+>         tv = Tolvera(**kwargs)
+> 
+>         tv.iml.flock_p2flock_s = {
+>             'size': (tv.s.flock_p.size, tv.s.flock_s.size), 
+>             'io': (tv.s.flock_p.to_vec, tv.s.flock_s.from_vec),
+>             'randomise': True,
+>         }
+>         
+>         @tv.render
+>         def _():
+>             tv.px.diffuse(0.99)
+>             tv.v.flock(tv.p)
+>             tv.px.particles(tv.p, tv.s.species, 'circle')
+>             return tv.px
+> 
+>     if __name__ == '__main__':
+>         run(main)
+>     ```
+> 
+> IML Types:
+>     - `vec2vec`: Vector to vector mapping.
+>     - `vec2fun`: Vector to function mapping.
+>     - `vec2osc`: Vector to OSC mapping.
+>     - `fun2vec`: Function to vector mapping.
+>     - `fun2fun`: Function to function mapping.
+>     - `fun2osc`: Function to OSC mapping.
+>     - `osc2vec`: OSC to vector mapping.
+>     - `osc2fun`: OSC to function mapping.
+>     - `osc2osc`: OSC to OSC mapping.
+
+- `def rand_select(method)`
+    Select randomisation method.
+    
+    Args:
+        method (str, optional): Randomisation method. Defaults to "rand".
+    
+    Raises:
+        ValueError: Invalid method.
+        
+    Returns:
+        callable: Randomisation method.
+
+- `class IMLDict`
+    IML mapping dict
+
+    Similarly to `StateDict`, this class inherits from `dotdict` to enable instantiation
+    via assignment.
+
+    - `def __init__(self, context)`
+        Initialise IMLDict
+
+        Args:
+            context (TolveraContext): TolveraContext instance.
+
+    - `def set(self, name, kwargs)`
+        Set IML instance.
+
+        Args:
+            name (str): Name of IML instance.
+            kwargs (dict): IML instance kwargs.
+
+        Raises:
+            ValueError: Cannot replace 'tv' IML instance.
+            ValueError: Cannot replace 'i' IML instance.
+            ValueError: Cannot replace 'o' IML instance.
+            NotImplementedError: set() with tuple not implemented yet.
+            TypeError: set() requires dict|tuple, not _type_.
+            Exception: Other exceptions.
+
+        Returns:
+            Any: IML instance.
+
+    - `def infer_type(self, io)`
+        Infer IML type from kwargs.
+
+        Args:
+            io (tuple): IML input-output types.
+
+        Raises:
+            ValueError: Invalid IML types.
+
+        Returns:
+            str: IML type.
+
+    - `def __setattr__(self, __name, __value)`
+        Set IML instance.
+
+        Args:
+            __name (str): Name of IML instance.
+            __value (Any): IML instance kwargs.
+
+    - `def add(self, name, iml_type, **kwargs)`
+        Add IML instance.
+
+        Args:
+            name (str): Name of IML instance.
+            iml_type (str): IML type.
+
+        Raises:
+            ValueError: Invalid IML_TYPE.
+
+        Returns:
+            Any: IML instance.
+
+    - `def __call__(self, name, *args, **kwargs)`
+        Call IML instance or all IML instances.
+
+        Args:
+            name (str, optional): Name of IML instance to call. Defaults to None.
+
+        Raises:
+            ValueError: 'name' not in dict.
+
+        Returns:
+            Any: IML output or dict of IML outputs.
+
+
+- `class IMLBase`
+    This class inherits from [anguilla](https://intelligent-instruments-lab.github.io/anguilla) 
+    and adds some functionality. It is not intended to be used directly, but rather 
+    to be inherited from.
+
+    The base class is initialised with a size tuple (input, output) and a config dict
+    which is passed to `anguilla.IML`.
+
+    It provides a `randomise` method which adds random pairs to the mapping.
+    It also provides methods to remove pairs (`remove_oldest`, `remove_newest`, `remove_random`).
+    It also provides a `lag` method which lags the mapped data.
+    Finally, it provides an `update` method which is called by the `updater` (see `.osc.update`).
+
+    - `def __init__(self, **kwargs)`
+        Initialise IMLBase
+    
+        kwargs:
+            size (tuple, required): (input, output) sizes.
+            io (tuple, optional): (input, output) functions.
+            config (dict, optional): {embed_input, embed_output, interpolate, index, verbose}.
+            updater (cls, optional): See iipyper.osc.update (Updater, OSCSendUpdater, ...).
+            update_rate (int, optional): Updater's update rate (defaults to 1).
+            randomise (bool, optional): Randomise mapping on init (defaults to False).
+            rand_pairs (int, optional): Number of random pairs to add (defaults to 32).
+            rand_input_weight (Any, optional): Random input weight (defaults to None).
+            rand_output_weight (Any, optional): Random output weight (defaults to None).
+            rand_method (str, optional): rand_method type (see utils).
+            rand_kw (dict, optional): Random kwargs to pass to rand_method (see utils).
+            map_kw (dict, optional): kwargs to use in IML.map().
+            infun_kw (dict, optional): kwargs to use in infun() (type 'Fun2*' only).
+            outfun_kw (dict, optional): kwargs to use in outfun() (type '*2Fun' only).
+            lag (bool, optional): Lag mapped data (defaults to False). Incompatible with '*2Fun' types.
+            lag_coef (float, optional): Lag coefficient (defaults to 0.5 if `lag` is True).
+
+    - `def init_randomise(self, **kwargs)`
+        Initialise randomise() method with kwargs
+
+        kwargs: see __init__ kwargs.
+
+    - `def init_lag(self, **kwargs)`
+        Initialise lag() method with kwargs
+        
+        kwargs: see __init__ kwargs.
+
+    - `def randomise(self, times, input_weight, output_weight, method, **kwargs)`
+        Randomise mapping.
+
+        Args:
+            times (int): Number of random pairs to add.
+            input_weight (Any, optional): Weighting for the input vector. Defaults to None.
+            output_weight (Any, optional): Weighting for the output vector. Defaults to None.
+            method (str, optional): Randomisation method. Defaults to "rand".
+
+    - `def set_random_method(self, method)`
+        Set random method.
+
+        Args:
+            method (str, optional): Randomisation method. Defaults to "rand".
+
+    - `def add_random_pair(self, input_weight, output_weight, **kwargs)`
+        Add random pair to mapping.
+
+        Args:
+            input_weight (Any, optional): Weighting for the input vector. Defaults to None.
+            output_weight (Any, optional): Weighting for the output vector. Defaults to None.
+            **kwargs: see random_pair kwargs.
+
+    - `def random_input(self, **kwargs)`
+        Random input vector.
+
+        Args:
+            **kwargs: self.rand kwargs.
+
+        Returns:
+            torch.Tensor: Random input vector.
+
+    - `def random_output(self, **kwargs)`
+        Random output vector.
+
+        Args:
+            **kwargs: self.rand kwargs
+
+        Returns:
+            torch.Tensor: Random output vector.
+
+    - `def random_pair(self, input_weight, output_weight, **kwargs)`
+        Create random pair.
+
+        Args:
+            input_weight (Any, optional): Weighting for the input vector. Defaults to None.
+            output_weight (Any, optional): Weighting for the output vector. Defaults to None.
+            **kwargs:
+                rand_method (str, optional): Randomisation method. Defaults to "rand".
+                rand_kw (dict, optional): Random kwargs to pass to rand_method (see utils).
+            
+        Raises:
+            ValueError: Invalid input_weight type.
+            ValueError: Invalid output_weight type.
+
+        Returns:
+            tuple: (input, output) vectors.
+
+    - `def remove_oldest(self, n)`
+        Remove oldest pair(s) from mapping.
+
+        Args:
+            n (int, optional): Number of pairs to remove. Defaults to 1.
+
+    - `def remove_newest(self, n)`
+        Remove newest pair(s) from mapping.
+
+        Args:
+            n (int, optional): Number of pairs to remove. Defaults to 1.
+
+    - `def remove_random(self, n)`
+        Remove random pair(s) from mapping.
+
+        Args:
+            n (int, optional): Number of pairs to remove. Defaults to 1.
+
+    - `def lag_mapped_data(self, lag_coef)`
+        Lag mapped data.
+
+        Args:
+            lag_coef (float, optional): Lag coefficient. Defaults to 0.5.
+
+    - `def update(self, invec)`
+        Update mapped data.
+
+        Args:
+            invec (list|torch.Tensor|np.ndarray): Input vector.
+
+        Returns:
+            list|torch.Tensor|np.ndarray: Mapped data.
+
+    - `def update_rate(self, rate)`
+        Update rate getter/setter.
+
+        Args:
+            rate (int, optional): Update rate. Defaults to None.
+
+        Returns:
+            int: Update rate.
+
+    - `def __call__(self, *args)`
+        Call updater with args.
+
+        Args:
+            *args: Updater args.
+
+        Returns:
+            Any: Mapped data.
+
+
+- `class IMLVec2Vec`
+    IML vector to vector mapping.
+
+    Input vector is accessed via `tv.iml.i['name']`.
+    Output vector is accessed via `tv.iml.o['name']`.
+
+    Example:
+        ```py
+        tv.iml.flock_p2flock_s = {
+            'io': (None, None),
+            'size': (tv.s.flock_p.size, tv.s.flock_s.size)
+        }
+
+        def update():
+            invec = tv.s.flock_p.to_vec()
+            tv.iml.i = {'flock_p2flock_s': invec}
+            flock_s_outvec = tv.iml.o['flock_p2flock_s']
+            if flock_s_outvec is not None:
+                tv.s.flock_s.from_vec(flock_s_outvec)
+        ```
+
+    Args:
+        kwargs:
+            see IMLBase kwargs.
+
+    - `def __init__(self, **kwargs)`
+        Initialise IMLVec2Vec
+
+
+- `class IMLVec2Fun`
+    IML vector to function mapping
+
+    Example:
+        ```py
+        def update(outvec):
+            print('outvec', outvec)
+
+        tv.iml.flock_p2fun = {
+            'size': (tv.s.flock_p.size, 8), 
+            'io': (None, update),
+        }
+        ```
+
+    - `def __init__(self, **kwargs)`
+        Initialise IMLVec2Fun
+        
+        Args:
+            kwargs:
+                io (tuple, required): (None, callable) output function.
+                see IMLBase kwargs.
+
+    - `def update(self, invec)`
+        Update mapped data.
+
+        Args:
+            invec (list | torch.Tensor | np.ndarray): Input vector.
+
+        Returns:
+            list|torch.Tensor|np.ndarray: Mapped data.
+
+
+- `class IMLVec2OSC`
+    IML vector to OSC mapping.
+
+    Example:
+        Sends the output vector to '/tolvera/flock'.
+
+        ```py
+        tv.iml.flock_p2osc = {
+            'size': (tv.s.flock_p.size, 8), 
+            'io': (None, 'tolvera_flock'),
+        }
+        ```
+
+    - `def __init__(self, osc_map, **kwargs)`
+        Initialise IMLVec2OSC
+
+        Args:
+            osc_map (OSCMap, required): OSCMap instance.
+            kwargs:
+                io (tuple, required): (None, str) output OSC route.
+                see IMLBase kwargs.
+
+    - `def update(self)`
+        Update mapped data.
+
+        Returns:
+            list|torch.Tensor|np.ndarray: Mapped data.
+
+
+- `class IMLFun2Vec`
+    IML function to vector mapping.
+
+    Output vector is accessed via `tv.iml.o['name']`.
+
+    Example:
+        ```py
+        tv.iml.flock_p2vec = {
+            'size': (tv.s.flock_p.size, 8), 
+            'io': (tv.s.flock_p.to_vec, None),
+        }
+        # ...
+        flock_s_outvec = tv.iml.o['flock_p2flock_s']
+        ```
+
+    - `def __init__(self, **kwargs)`
+        Initialise IMLFun2Vec
+
+        Args:
+            kwargs:
+                io (tuple, required): (callable, None) input function.
+                see IMLBase kwargs.
+
+    - `def update(self)`
+        Update mapped data.
+
+        Returns:
+            list|torch.Tensor|np.ndarray: Mapped data.
+
+
+- `class IMLFun2Fun`
+    IML function to function mapping.
+
+    Example:
+        ```py
+        def infun():
+            return [0,0,0,0]
+
+        def outfun(vector):
+            print('outvec', vector)
+
+        tv.iml.test2test = {
+            'size': (4, 8), 
+            'io': (infun, outfun),
+        }
+        ```
+
+    - `def __init__(self, **kwargs)`
+        Initialise IMLFun2Fun
+
+        Args:
+            kwargs:
+                io (tuple, required): (callable, callable) input and output functions.
+                see IMLBase kwargs.
+
+    - `def update(self)`
+        Update mapped data.
+
+        Returns:
+            list|torch.Tensor|np.ndarray: Mapped data.
+
+
+- `class IMLFun2OSC`
+    IML function to OSC mapping
+
+    Example:
+        This will send the output vector to '/out/vec'.
+
+        ```py
+        def infun():
+            return [0,0,0,0]
+
+        tv.iml.test2osc = {
+            'size': (4, 8), 
+            'io': (infun, 'out_vec'),
+        }
+        ```
+
+    - `def __init__(self, osc_map, **kwargs)`
+        Initialise IMLFun2OSC
+
+        Args:
+            osc_map (OSCMap, required): OSCMap instance.
+            kwargs:
+                io (tuple, required): (callable, str) input function and output OSC route.
+                see IMLBase kwargs.
+
+    - `def update(self)`
+        Update mapped data.
+
+        Returns:
+            list[float]: Mapped data.
+
+
+- `class IMLOSC2Vec`
+    IML OSC to vector mapping
+
+    Example:
+        This will map the OSC input to the output vector and store it in `tv.iml.o['name']`.
+
+        ```py
+        tv.iml.test2vec = {
+            'size': (4, 8), 
+            'io': ('in_vec', None),
+        }
+        # ...
+        flock_s_outvec = tv.iml.o['flock_p2flock_s']
+        ```
+
+    - `def __init__(self, osc_map, outvecs, name, **kwargs)`
+        Initialise IMLOSC2Vec
+
+        Args:
+            osc_map (OSCMap, required): OSCMap instance.
+            outvecs (dict): Output vectors dict.
+            name (str): Name of output vector.
+            kwargs:
+                io (tuple, required): (str, None) input OSC route.
+                see IMLBase kwargs.
+
+    - `def update(self, vector)`
+        Update mapped data.
+
+        Args:
+            vector (list[float]): Input vector.
+
+        Returns:
+            list[float]: Mapped data.
+
+
+- `class IMLOSC2Fun`
+    IML OSC to function mapping
+
+    Example:
+        ```py
+        def outfun(vector):
+            print('outvec', vector)
+
+        tv.iml.test2fun = {
+            'size': (4, 8), 
+            'io': ('in_vec', outfun),
+        }
+        ```
+
+    - `def __init__(self, osc_map, **kwargs)`
+        Initialise IMLOSC2Fun
+
+        Args:
+            osc_map (OSCMap, required): OSCMap instance.
+            kwargs:
+                io (tuple, required): (str, callable) input OSC route and output function.
+                see IMLBase kwargs.
+
+    - `def update(self, vector)`
+        Update mapped data.
+
+        Args:
+            vector (list[float]): Input vector.
+
+        Returns:
+            list[float]: Mapped data.
+
+
+- `class IMLOSC2OSC`
+    IML OSC to OSC mapping
+
+    Example:
+        '/in/vec' is mapped and the output sent to '/out/vec'.
+
+        ```py
+        tv.iml.test2fun = {
+            'size': (4, 8), 
+            'io': ('in_vec', 'out_vec'),
+        }
+        ```
+
+    - `def __init__(self, osc_map, osc, **kwargs)`
+        Initialise IMLOSC2OSC
+
+        Args:
+            osc_map (OSCMap, required): OSCMap instance.
+            osc (OSC): iipyper OSC instance.
+            kwargs:
+                io (tuple, required): (str, str) input and output OSC routes.
+                see IMLBase kwargs.
+
+    - `def update(self, vector)`
+        Update mapped data.
+
+        Args:
+            vector (list[float]): Input vector.
+
+        Returns:
+            list[float]: Mapped data.
+
+
+## tolvera.mp.face
+
+- `class FaceKeyPoint`
+    The enum type of the six face detection key points.
+
+    - `@property def name(self)`
+
+- `@ti.dataclass class FaceConnection`
+
+- `@ti.data_oriented class MPFace`
+    - `def __init__(self, context, **kwargs)`
+    - `def detect(self, frame)`
+    - `@ti.kernel def draw(self)`
+    - `@ti.func def draw_face_lms(self, r, rgba)`
+    - `@ti.func def draw_lm(self, face, lm, r, rgba)`
+    - `def landmark_name_from_index(self, index)`
+    - `def landmark_index_from_name(self, name)`
+    - `@ti.kernel def get_landmark(self, face, landmark)`
+    - `def __call__(self, frame)`
+
+## tolvera.mp.face_mesh
+
+- `@ti.dataclass class FaceMeshConnection`
+
+- `@ti.data_oriented class MPFaceMesh`
+    - `def __init__(self, context, **kwargs)`
+    - `def setup_connections(self)`
+    - `def detect(self, frame)`
+    - `@ti.kernel def draw(self)`
+    - `@ti.func def draw_face_lms(self, r, rgba)`
+    - `@ti.func def draw_face_conns(self, rgba)`
+    - `@ti.func def draw_conn(self, face, conn, rgba)`
+    - `@ti.func def draw_lm(self, face, lm, r, rgba)`
+    - `def __call__(self, frame)`
+
+## tolvera.mp.hands
+
+- `class HandLandmark`
+    The 21 hand landmarks.
+
+    - `@property def name(self)`
+
+- `@ti.dataclass class HandConnection`
+
+- `@ti.data_oriented class MPHands`
+    - `def __init__(self, context, **kwargs)`
+    - `def setup_connections(self)`
+    - `def detect(self, frame)`
+    - `@ti.kernel def draw_hands(self)`
+    - `@ti.kernel def draw_hand(self, hand)`
+    - `@ti.func def draw_hand_conns(self, hand)`
+    - `@ti.func def draw_palm_conns(self, hand)`
+    - `@ti.func def draw_thumb_conns(self, hand)`
+    - `@ti.func def draw_index_conns(self, hand)`
+    - `@ti.func def draw_middle_conns(self, hand)`
+    - `@ti.func def draw_ring_conns(self, hand)`
+    - `@ti.func def draw_pinky_conns(self, hand)`
+    - `@ti.func def draw_conn(self, hand, conn, rgba)`
+    - `@ti.func def draw_hand_lms(self, hand)`
+    - `@ti.func def draw_palm_lms(self, hand)`
+    - `@ti.func def draw_thumb_lms(self, hand)`
+    - `@ti.func def draw_index_lms(self, hand)`
+    - `@ti.func def draw_middle_lms(self, hand)`
+    - `@ti.func def draw_ring_lms(self, hand)`
+    - `@ti.func def draw_pinky_lms(self, hand)`
+    - `@ti.func def draw_lm(self, hand, lm, r, rgba)`
+    - `def train(self, id)`
+    - `def recognize(self, id)`
+    - `def landmark_name_from_index(self, index)`
+    - `def landmark_index_from_name(self, name)`
+    - `@ti.kernel def get_landmark(self, hand, landmark)`
+    - `def __call__(self, frame)`
+
+## tolvera.mp.pose
+
+- `class PoseLandmark`
+    The 33 pose landmarks.
+
+    - `@property def name(self)`
+
+- `@ti.dataclass class PoseConnection`
+
+- `@ti.data_oriented class MPPose`
+    - `def __init__(self, context, **kwargs)`
+    - `def setup_connections(self)`
+    - `def detect(self, frame)`
+    - `@ti.kernel def draw(self)`
+    - `@ti.func def draw_pose_conns(self, rgba)`
+    - `@ti.func def draw_pose_lms(self, r, rgba)`
+    - `@ti.func def draw_conn(self, conn, rgba)`
+    - `@ti.func def draw_lm(self, lm, r, rgba)`
+    - `def landmark_name_from_index(self, index)`
+    - `@ti.kernel def get_landmark(self, pose, landmark)`
+    - `def __call__(self, frame)`
+
+## tolvera.npndarray_dict
+
+> Module for working with dictionary of NumPy ndarrays.
+> 
+> Primaril used by State.
+
+- `def dict_from_vector_args(a, scalars)`
+    Convert a list of arguments to a dictionary.
+
+    Args:
+    - a: A list of arguments.
+    - scalars: A list of keys that should be unwrapped from lists.
+
+    Returns:
+    - A dictionary of keyword arguments.
+
+- `def dict_to_vector_args(kw)`
+    Convert a dictionary to a list of arguments.
+
+    This function takes a dictionary and returns a list of arguments.
+
+    Args:
+    - kw: A dictionary of keyword arguments.
+
+    Returns:
+    - A list of arguments.
+
+- `def ndarraydict_from_vector_args(lst, shapes)`
+    Convert a list to a dictionary where each list is turned into a numpy array.
+
+    This function takes a list in the format output by `dict_from_vector_args` and converts it
+    into a dictionary. Each key's list of values is converted into a numpy array with a
+    specified shape.
+
+    Args:
+    - lst: The list to be converted.
+    - shapes: A dictionary where keys correspond to the keys in the original list and
+              values are tuples representing the desired shape of the numpy array.
+
+    Returns:
+    - A dictionary with keys mapped to numpy arrays.
+
+- `def shapes_from_ndarray_dict(ndarray_dict)`
+    Return a dictionary of shapes given a dictionary of numpy ndarrays.
+
+    This function takes a dictionary where values are numpy ndarrays and returns
+    a new dictionary with the same keys, where each value is the shape of the ndarray.
+
+    Args:
+    - ndarray_dict: A dictionary where values are numpy ndarrays.
+
+    Returns:
+    - A dictionary where each key maps to the shape of the corresponding ndarray.
+
+- `class NpNdarrayDict`
+    A class that encapsulates a dictionary of NumPy ndarrays, each associated with a specific data type and a defined min-max range.
+    It provides a structured and efficient way to manage and manipulate multidimensional arrays with constraints on their values.
+
+    Attributes:
+        data (Dict[str, Dict[str, Union[np.ndarray, Any]]]): A dictionary where each key represents an attribute,
+        and the value is another dictionary with keys 'array', 'min', and 'max', representing the ndarray,
+        its minimum value, and its maximum value, respectively.
+        shape (Tuple[int, int]): The shape of the ndarrays, which is consistent across all attributes.
+
+    Example:
+        state = NpNdarrayDict({
+            'i':  (np.int32, 2, 10),
+            'f':  (np.float32, 0., 1.),
+            'v2': (np_vec2, 0., 1.),
+            'v3': (np_vec3, 0., 1.),
+            'v4': (np_vec4, 0., 1.),
+        }, (2,2))
+        state.set_value('i', (0, 0), 5)
+        print(state.get_value('i', (0, 0)))
+        5
+
+    - `def __init__(self, data_dict, shape)`
+        Initialize the State class.
+
+        Args:
+            data_dict: A dictionary where keys are attribute names and values are tuples
+                       of (dtype, min_value, max_value).
+            shape: The shape of the numpy arrays for each attribute.
+
+    - `def init(self, data_dict, shape)`
+    - `def from_vec(self, vec)`
+    - `def to_vec(self)`
+    - `def attr_from_vec(self, attr, vec)`
+    - `def attr_to_vec(self, attr)`
+    - `def slice_from_vec(self, slice_args, slice_vec)`
+    - `def slice_to_vec(self, slice_args)`
+    - `def attr_slice_from_vec(self, attr, slice_args, slice_vec)`
+    - `def attr_slice_to_vec(self, attr, slice_args)`
+    - `def get_slice_size(self, slice_args)`
+    - `def get_attr_slice_size(self, attr, slice_args)`
+    - `def set_slice_from_dict(self, slice_indices, slice_values)`
+    - `def set_slice_from_list(self, slice_indices, slice_values_list)`
+    - `def set_data(self, new_data)`
+        Set the data with a new data dictionary.
+
+        Args:
+            new_data: A dictionary representing the new data, where each key is an
+                    attribute and the value is a numpy array.
+
+        Raises:
+            ValueError: If the new data is invalid (e.g., wrong shape, type, or value range).
+
+    - `def get_data(self)`
+        Get the entire current data as a dictionary.
+
+        Returns:
+            A dictionary where each key is an attribute and the value is a numpy array.
+
+    - `def validate(self, new_state)`
+    - `def randomise(self)`
+        Randomize the entire state dictionary based on the datatype, minimum,
+        and maximum values for each attribute.
+
+    - `def randomise_attr(self, key)`
+        Randomize a specific attribute in the state dictionary based on its datatype,
+        minimum, and maximum values.
+
+        Args:
+            key: The attribute key to randomize.
+
+    - `def attr_apply(self, key, func)`
+        Apply a user-defined function to the array of a specified key.
+
+        Args:
+            key: The attribute key.
+            func: A function that takes a numpy array and returns a numpy array.
+
+        Raises:
+            KeyError: If the key is not found.
+
+    - `def attr_broadcast(self, key, other, op)`
+        Perform a broadcasting operation between the array of the specified key and another array or NpNdarrayDict.
+
+        Args:
+            key: The key of the array in the dictionary to operate on.
+            other: The other array or NpNdarrayDict to use in the operation.
+            op: A function to perform the operation. This should be a NumPy ufunc (like np.add, np.multiply).
+
+        Raises:
+            KeyError: If the key is not found in the dictionary.
+            ValueError: If the operation cannot be broadcasted or if it violates the min-max constraints.
+
+
+## tolvera.osc.maxmsp
+
+- `class MaxPatcher`
+    TODO: copy-paste using stdout
+    TODO: add scale objects before send and after receive
+    TODO: add default values via loadbangs
+    TODO: move udpsend/udpreceive to the top left
+    TODO: dict of object ids
+    TODO: add abstraction i/o messages e.g. param names, state save/load/dumps
+
+    - `def __init__(self, osc, client_name, filepath, x, y, w, h, v)`
+    - `def init(self)`
+    - `def box(self, box_type, inlets, outlets, x, y, w, h)`
+    - `def create_box(self, box_type, inlets, outlets, x, y, w, h)`
+    - `def object(self, text, inlets, outlets, x, y)`
+    - `def message(self, text, x, y)`
+    - `def comment(self, text, x, y, fontsize)`
+    - `def bang(self, x, y)`
+    - `def slider(self, x, y, min_val, size, float)`
+    - `def connect(self, src, src_outlet, dst, dst_inlet)`
+    - `def osc_send(self, ip, port, x, y, print, print_label)`
+    - `def osc_receive(self, port, x, y, print, print_label)`
+    - `def osc_route(self, port, x, y, print, print_label)`
+        [route path]
+        [s name] [print]
+        [unpack] ?
+        [r name]
+
+    - `def send_args_func(self, f)`
+    - `def send_list_func(self, f)`
+    - `def receive_args_func(self, f)`
+    - `def receive_list_func(self, f)`
+    - `def osc_send_msg(self, x, y, path)`
+    - `def osc_receive_msg(self, x, y, path)`
+    - `def osc_send_with_controls(self, x, y, path, parameters)`
+        [comment path]
+        [comment args]
+        [r path_arg_name]
+        sliders
+        |                   |
+        [pak $1 $2 $3 ...]
+        |
+        [msg /path $1 $2 $3 ...]
+        |
+        [s send]
+
+    - `def osc_receive_with_controls(self, x, y, path, parameters)`
+        [comment path]
+        [r receive]
+        |
+        [route /path]
+        |                  |
+        [unpack f f f ...] [print /path]
+        |
+        [slider] ...
+        |
+        [number] ...
+        |
+        [s arg_name]
+        [comment path_arg_name]
+        [comment type min-max]
+
+    - `def sliders(self, x, y, sliders)`
+        sliders = [
+          { 'label': 'x', data: 'float', min_val: 0.0, size: 0.0 },
+        ]
+
+        [slider] ...
+        |
+        [number] ...
+
+    - `def param_comments(self, x, y, params)`
+    - `def osc_send_list(self, x, y, path, params)`
+        [comment] path, list name, params
+        [r] path
+        [prepend path]
+        [s send]
+
+    - `def osc_receive_list(self, x, y, path, params)`
+        [comment] path
+        [r receive.from.iipyper]
+        [routeOSC path]
+        [s path]
+        [comment] params
+
+    - `def get_box_by_id(self, id)`
+    - `def str_from_id(self, id)`
+    - `def id_from_str(self, obj_str)`
+    - `def path_to_snakecase(self, path)`
+    - `def save(self, name)`
+    - `def load(self, name)`
+
+## tolvera.osc.osc
+
+- `class OSC`
+    - `def __init__(self, context, **kwargs)`
+    - `def init_osc(self, **kwargs)`
+    - `def init_map(self, **kwargs)`
+
+## tolvera.osc.oscmap
+
+- `class OSCMap`
+    OSCMap maps OSC messages to functions
+    It creates a Max/MSP patcher that can be used to control the OSCMap
+    It uses OSCSendUpdater and OSCReceiveUpdater to decouple incoming messages
+
+    - `def __init__(self, osc, client_name, patch_type, patch_filepath, create_patch, pd_net_or_udp, pd_bela, export)`
+    - `def init_patcher(self, patch_type, patch_filepath, pd_net_or_udp, pd_bela)`
+    - `def add(self, **kwargs)`
+    - `def map_func_to_dict(self, func, kwargs)`
+    - `def send_args(self, **kwargs)`
+    - `def add_send_args(self, func, kwargs)`
+    - `def add_send_args_to_osc_map(self, func, kwargs)`
+    - `def add_send_args_to_patcher(self, func)`
+    - `def send_list(self, **kwargs)`
+    - `def add_send_list(self, func, kwargs)`
+    - `def add_send_list_to_osc_map(self, func, kwargs)`
+    - `def add_send_list_to_patcher(self, func)`
+    - `def send_list_inline(self, name, sender_func, length, send_mode, count, **kwargs)`
+    - `def send_kwargs(self, **kwargs)`
+    - `def receive_args(self, **kwargs)`
+    - `def add_receive_args(self, func, kwargs)`
+    - `def add_receive_args_to_osc_map(self, func, kwargs)`
+    - `def add_receive_args_to_patcher(self, func)`
+    - `def receive_args_inline(self, name, receiver_func, **kwargs)`
+    - `def receive_list(self, **kwargs)`
+    - `def randomise_list(self, length, min, max)`
+    - `def add_receive_list(self, func, kwargs)`
+    - `def add_receive_list_to_osc_map(self, func, kwargs)`
+        TODO: Should this support list[float] only, or list[int] list[str] etc?
+
+    - `def add_receive_list_to_patcher(self, func)`
+    - `def receive_list_inline(self, name, receiver_func, length, count, **kwargs)`
+    - `def receive_list_with_idx(self, name, receiver, idx_len, vec_len, attr)`
+        Create an OSC list handler that assumes that the first `idx_len` values are indices into some struct being modified by a receiver function, and the rest are args as a list, i.e.
+            /name idx0 idx1 ... idxN arg0 arg1 ... argM
+            ...
+            receiver((idx0 idx1 ... idxN), args)
+        Intended as a utility function to be used by external classes where it's not possible to use a decorator like `receive_list`.
+
+    - `def receive_kwargs(self, **kwargs)`
+        Same as receive_args but with named params
+
+    - `def export_dict(self)`
+        Save the OSCMap dict as XML
+
+    - `def xml_add_args_params(self, root, name, io, f)`
+    - `def xml_add_list_param(self, root, name, io, f)`
+    - `def export_update(self, root)`
+    - `def save_xml(self, tree, root)`
+    - `def save_json(self, xml_root)`
+    - `def etree_to_dict(self, t)`
+    - `def pascal_to_camel(self, s)`
+    - `def xml_to_json(self, xml_str)`
+    - `def update(self)`
+    - `def __call__(self, *args, **kwds)`
+
+## tolvera.osc.pd
+
+- `class PdPatcher`
+    - `def __init__(self, osc, client_name, filepath, x, y, w, h, net_or_udp, bela)`
+    - `def init(self)`
+    - `def create_bela_main(self)`
+    - `def box(self, box_type, x, y, box_text)`
+    - `def object(self, obj, x, y)`
+    - `def msg(self, msg, x, y)`
+    - `def comment(self, text, x, y)`
+    - `def number(self, x, y)`
+    - `def connect(self, a_id, a_outlet, b_id, b_inlet)`
+    - `def osc_send(self, host, port, x, y, send_rate_limit)`
+    - `def osc_receive(self, port, x, y)`
+    - `def send_args_func(self, f)`
+    - `def send_list_func(self, f)`
+    - `def receive_args_func(self, f)`
+    - `def receive_list_func(self, f)`
+    - `def osc_receive_msg(self, x, y, path)`
+        does this even make sense?
+
+    - `def osc_send_msg(self, x, y, path)`
+    - `def osc_receive_with_controls(self, x, y, path, parameters)`
+        TODO: Does [route] need to be broken down into individual subpaths?
+
+    - `def osc_send_with_controls(self, x, y, path, parameters)`
+    - `def sliders(self, x, y, sliders, io)`
+    - `def slider(self, send_rate_id, x, y, min_val, size, float, io)`
+    - `def send_rate_limit_int(self, slider_id, send_rate_id, x, y)`
+    - `def receive_rate_limit_int(self, slider_id, send_rate_id, x, y)`
+    - `def send_rate_limit_float(self, slider_id, send_rate_id, x, y)`
+    - `def recieve_rate_limit_float(self, slider_id, send_rate_id, x, y)`
+    - `def param_comments(self, x, y, params)`
+    - `def osc_send_list(self, x, y, path, params)`
+        [comment] path, list name, params
+        [r] path
+        [list prepend path]
+        [list trim]
+        [s send.to.iipyper]
+
+    - `def osc_receive_list(self, x, y, path, params)`
+        [comment] path
+        [r receive.from.iipyper]
+        [routeOSC path]
+        [s path]
+        [comment] params
+
+    - `def get_last_id(self)`
+    - `def path_to_snakecase(self, path)`
+    - `def save(self, name)`
+    - `def load(self, name)`
+
+## tolvera.osc.update
+
+- `class Updater`
+    Rate-limited function call
+
+    - `def __init__(self, f, count)`
+    - `def __call__(self, *args, **kwargs)`
+
+- `class ReceiveUpdater`
+    Decouples event handling from updating
+    Updating is rate-limited by a counter
+    TODO: Rename to ReceiveArgsUpdater?
+
+    - `def __init__(self, f, state, count, update)`
+    - `def set(self, state)`
+        Set the Updater's state
+
+    - `def __call__(self)`
+        Update the target function with internal state
+
+
+- `class ReceiveListUpdater`
+    Decouples event handling from updating
+    Updating is rate-limited by a counter
+    Assumes a list[float] instead of *args
+
+    - `def __init__(self, f, state, count, update)`
+    - `def set(self, state)`
+        Set the Updater's state
+
+    - `def __call__(self)`
+        Update the target function with internal state
+
+
+- `class OSCReceiveUpdater`
+    ReceiveUpdater with an OSC handler
+
+    - `def __init__(self, osc, address, f, state, count, update)`
+    - `def receive(self, address, *args)`
+        v: first argument to the handler is the IP:port of the sender
+        v: or you can use dispatcher.map directly
+           and not set needs_reply_address=True
+        j: can I get ip:port from osc itself?
+        v: if you know the sender ahead of time yeah,
+           but that lets you respond to different senders dynamically
+
+
+- `class OSCReceiveListUpdater`
+    ReceiveListUpdater with an OSC handler
+
+    - `def __init__(self, osc, address, f, state, count, update)`
+    - `def receive(self, address, *args)`
+
+- `class OSCSend`
+    Non rate-limited OSC send
+
+    - `def __init__(self, osc, address, f, client)`
+    - `def __call__(self, *args)`
+
+- `class OSCSendUpdater`
+    Rate-limited OSC send
+
+    - `def __init__(self, osc, address, f, count, client)`
+    - `def __call__(self)`
+
+- `class OSCReceiveUpdaters`
+    o = OSCReceiveUpdaters(osc,
+        {"/tolvera/particles/pos": s.osc_set_pos,
+         "/tolvera/particles/vel": s.osc_set_vel})
+
+    - `def __init__(self, osc, receives, count)`
+    - `def add_dict(self, receives, count)`
+    - `def add(self, address, function, state, count, update)`
+    - `def __call__(self)`
+
+- `class OSCSendUpdaters`
+    o = OSCSendUpdaters(osc, client="particles", count=10,
+        sends={
+            "/tolvera/particles/get/pos/all": s.osc_get_pos_all
+        })
+
+    - `def __init__(self, osc, sends, count, client)`
+    - `def add_dict(self, sends, count, client)`
+    - `def add(self, address, function, state, count, update, client)`
+    - `def __call__(self)`
+
+- `class OSCUpdaters`
+    o = OSCUpdaters(osc, client="boids", count=10,
+        receives={
+            "/tolvera/boids/pos": b.osc_set_pos,
+            "/tolvera/boids/vel": b.osc_set_vel
+        },
+        sends={
+            "/tolvera/boids/pos/all": b.osc_get_all_pos
+        }
+    )
+
+    - `def __init__(self, osc, sends, receives, send_count, receive_count, client)`
+    - `def add_sends(self, sends, count, client)`
+    - `def add_send(self, send, count, client)`
+    - `def add_receives(self, receives, count)`
+    - `def add_receive(self, receive, count)`
+    - `def __call__(self)`
+
+## tolvera.particles
+
+> Particle system.
+> 
+> The Tolvera particle system consists of a Particle class and a Particles class.
+> The Particle class is a Taichi dataclass for a single particle, and the Particles
+> class is a Taichi data_oriented class containing a Particle field. 
+> 
+> The Particles class also contains methods for processing the particle system, 
+> such as updating the particles, and getting and setting particle properties.
+
+- `@ti.dataclass class Particle`
+    Particle data structure and methods.
+
+    - `@ti.func def dist(self, other)`
+        Distance between two particles.
+
+        Args:
+            other (Particle): Other particle.
+
+        Returns:
+            ti.math.vec2: Distance between the two particles.
+
+    - `@ti.func def dist_norm(self, other)`
+        ti.math.norm() distance between two particles.
+
+        Args:
+            other (Particle): Other particle.
+
+        Returns:
+            ti.math.vec2: ti.math.norm() distance between the two particles.
+
+    - `@ti.func def dist_normalized(self, other)`
+        ti.math.normalized() distance between two particles.
+
+        Args:
+            other (Particle): Other particle.
+
+        Returns:
+            ti.math.vec2: ti.math.normalized() distance between the two particles.
+
+    - `@ti.func def dist_wrap(self, other, x, y)`
+        Wrap around distance between two particles.
+
+        Args:
+            other (Particle): Other particle.
+            x (float): Width.
+            y (float): Height.
+        
+        Returns:
+            ti.math.vec2: Wrap around distance between the two particles.
+
+    - `@ti.func def randomise(self, x, y)`
+        Randomise the particle's position and velocity.
+
+        Args:
+            x (ti.f32): Width.
+            y (ti.f32): Height.
+
+    - `@ti.func def randomise_pos(self, x, y)`
+        Randomise the particle's position.
+
+        Args:
+            x (ti.f32): Width.
+            y (ti.f32): Height.
+
+    - `@ti.func def randomise_vel(self)`
+        Randomise the particle's velocity.
+
+
+- `@ti.data_oriented class Particles`
+    Particle system.
+
+    - `def __init__(self, tolvera, **kwargs)`
+        Initialise the particle system.
+
+        Args:
+            tolvera (Tolvera): Tolvera instance.
+            **kwargs: Keyword arguments (currently there are none).
+
+    - `def init(self)`
+        Initialise the particle system.
+
+    - `@ti.kernel def assign_species(self)`
+        Assign species to particles.
+
+    - `@ti.kernel def randomise(self)`
+        Randomise the particle system (Taichi scope).
+
+    - `@ti.kernel def update(self)`
+        Update the particle system.
+
+    - `@ti.func def toroidal_wrap(self, i)`
+        Toroidal wrap a particle.
+
+        Args:
+            i (ti.i32): Particle index.
+
+    - `@ti.func def limit_speed(self, i)`
+        Limit the speed of a particle.
+
+        Args:
+            i (ti.i32): Particle index.
+
+    - `@ti.func def detect_collisions(self, i, radius)`
+        Detect collisions between particles.
+
+        TODO: Merge deltas into @ti.dataclass, or reimplement Particle.field as tv.s?
+        TODO: Multiple collision states? Collided, Colliding, etc.
+        TODO: Detect collisions between external objects.
+
+        Args:
+            i (ti.i32): Particle index.
+            radius (ti.f32): Collision radius.
+
+    - `@ti.func def update_prev(self, i)`
+        Update the previous position and velocity of a particle.
+
+        Args:
+            i (ti.i32): Particle index.
+
+    - `@ti.kernel def activity_decay(self)`
+        Decay the activity of the particles.
+
+    - `def process(self)`
+        Process the particle system.
+
+    - `@ti.kernel def set_total_active(self, total)`
+        Set the total number of active particles.
+
+        Args:
+            total (ti.i32): Total active particles.
+
+    - `@ti.kernel def set_total_active_amount(self, total, amount)`
+        Set the total number of active particles.
+
+        Args:
+            total (ti.i32): Total active particles.
+            amount (ti.f32): Amount of activity.
+
+    - `@ti.kernel def set_species_total_active(self, i, total)`
+        Set the total number of active particles for a species.
+
+        Args:
+            i (ti.i32): Species index.
+            total (ti.i32): Total active particles.
+
+    - `@ti.kernel def set_species_total_active_amount(self, i, total, amount)`
+        Set particle activity amount of a species.
+
+        Args:
+            i (ti.i32): Species index.
+            total: (ti.i32): Total number of active particles.
+            amount (ti.i32): Amount of activity.
+
+    - `def set_pos(self, i, x, y)`
+    - `def set_vel(self, i, x, y)`
+    - `def set_speed(self, i, s)`
+    - `def set_size(self, i, s)`
+    - `def get_pos(self, i)`
+    - `def get_vel(self, i)`
+    - `def get_pos_all_1d(self)`
+    - `def get_pos_all_2d(self)`
+    - `def get_vel_all_1d(self)`
+    - `def get_vel_all_2d(self)`
+    - `def get_pos_species_1d(self, species)`
+    - `def get_pos_species_2d(self, species)`
+    - `def get_vel_species_1d(self, species)`
+    - `def get_vel_species_2d(self, species)`
+    - `def get_vel_stats_species_1d(self, species)`
+    - `def reset(self)`
+        Reset the particle system.
+
+    - `def speed(self, speed)`
+        Get or set the speed of the particle system.
+
+        Args:
+            speed (float, optional): Speed. Defaults to None.
+        
+        Returns:
+            float: Speed.
+
+    - `def __call__(self)`
+        Call will process the particle system.
+
+
+## tolvera.patches
+
+> Patches for third-party libraries.
+> 
+> Current patches:
+> - 'dill.source.findsource fails when in asyncio REPL' https://github.com/uqfoundation/dill/issues/627
+
+- `def findsource(object)`
+    Return the entire source file and starting line number for an object.
+    For interactively-defined objects, the 'file' is the interpreter's history.
+
+    The argument may be a module, class, method, function, traceback, frame,
+    or code object.  The source code is returned as a list of all the lines
+    in the file and the line number indexes a line in that list.  An IOError
+    is raised if the source code cannot be retrieved, while a TypeError is
+    raised for objects where the source code is unavailable (e.g. builtins).
+
+## tolvera.pixels
+
+> Pixels module.
+> 
+> Example:
+>     Draw a red rectangle in the centre of the screen.
+>     ```py
+>     import taichi as ti
+>     from tolvera import Tolvera, run
+> 
+>     def main(**kwargs):
+>         tv = Tolvera(**kwargs)
+> 
+>         @ti.kernel
+>         def draw():
+>             w = 100
+>             tv.px.rect(tv.x/2-w/2, tv.y/2-w/2, w, w, ti.Vector([1., 0., 0., 1.]))
+> 
+>         @tv.render
+>         def _():
+>             tv.p()
+>             draw()
+>             return tv.px
+> 
+>     if __name__ == '__main__':
+>         run(main)
+>     ```
+
+- `@ti.dataclass class Pixel`
+
+- `@ti.data_oriented class Pixels`
+    Pixels class for drawing pixels to the screen.
+
+    This class is used to draw pixels to the screen. It contains methods for drawing
+    points, lines, rectangles, circles, triangles, and polygons. It also contains
+    methods for blending pixels together, flipping pixels, inverting pixels, and
+    diffusing, decaying and clearing pixels.
+
+    It tries to follow a similar API to the Processing library.
+
+    - `def __init__(self, tolvera, **kwargs)`
+        Initialise Pixels
+
+        Args:
+            tolvera (Tolvera): Tölvera instance.
+            **kwargs: Keyword arguments.
+                polygon_mode (str): Polygon mode. Defaults to "crossing".
+                brightness (float): Brightness. Defaults to 1.0.
+
+    - `def set(self, px)`
+        Set pixels.
+
+        Args:
+            px (Any): Pixels to set. Can be Pixels, StructField, MatrixField, etc (see rgba_from_px).
+
+    - `@ti.kernel def k_set(self, px)`
+    - `@ti.kernel def f_set(self, px)`
+    - `@ti.func def stamp(self, x, y, px)`
+        Stamp pixels.
+
+        Args:
+            x (ti.i32): X position.
+            y (ti.i32): Y position.
+            px (ti.template): Pixels to stamp.
+
+    - `@ti.kernel def from_numpy(self, img)`
+    - `def from_img(self, path)`
+    - `def get(self)`
+        Get pixels.
+
+    - `@ti.kernel def clear(self)`
+        Clear pixels.
+
+    - `@ti.kernel def diffuse(self, evaporate)`
+        Diffuse pixels.
+        
+        Args:
+            evaporate (float): Evaporation rate.
+
+    - `@ti.func def background(self, r, g, b)`
+        Set background colour.
+
+        Args:
+            r (ti.f32): Red.
+            g (ti.f32): Green.
+            b (ti.f32): Blue.
+
+    - `@ti.func def point(self, x, y, rgba)`
+        Draw point.
+
+        Args:
+            x (ti.i32): X position.
+            y (ti.i32): Y position.
+            rgba (vec4): Colour.
+
+    - `@ti.func def points(self, x, y, rgba)`
+        Draw points with the same colour.
+
+        Args:
+            x (ti.template): X positions.
+            y (ti.template): Y positions.
+            rgba (vec4): Colour.
+
+    - `@ti.func def rect(self, x, y, w, h, rgba)`
+        Draw a filled rectangle.
+
+        Args:
+            x (ti.i32): X position.
+            y (ti.i32): Y position.
+            w (ti.i32): Width.
+            h (ti.i32): Height.
+            rgba (vec4): Colour.
+
+    - `@ti.func def stamp_f(self, x, y, px)`
+        Stamp pixels.
+
+        Args:
+            x (ti.i32): X position.
+            y (ti.i32): Y position.
+            px (ti.template): Pixels to stamp.
+
+    - `@ti.func def plot(self, x, y, c, rgba)`
+        Set the pixel color with blending.
+
+    - `@ti.func def ipart(self, x)`
+    - `@ti.func def round(self, x)`
+    - `@ti.func def fpart(self, x)`
+    - `@ti.func def rfpart(self, x)`
+    - `@ti.func def line(self, x0, y0, x1, y1, rgba)`
+        Draw an anti-aliased line using Xiaolin Wu's algorithm.
+
+    - `@ti.func def lines(self, points, rgba)`
+        Draw lines with the same colour.
+
+        Args:
+            points (ti.template): Points.
+            rgba (vec4): Colour.
+
+    - `@ti.func def circle(self, x, y, r, rgba)`
+        Draw a filled circle.
+
+        Args:
+            x (ti.i32): X position.
+            y (ti.i32): Y position.
+            r (ti.i32): Radius.
+            rgba (vec4): Colour.
+
+    - `@ti.func def circles(self, x, y, r, rgba)`
+        Draw circles with the same colour.
+
+        Args:
+            x (ti.template): X positions.
+            y (ti.template): Y positions.
+            r (ti.template): Radii.
+            rgba (vec4): Colour.
+
+    - `@ti.func def triangle(self, a, b, c, rgba)`
+        Draw a filled triangle.
+
+        Args:
+            a (vec2): Point A.
+            b (vec2): Point B.
+            c (vec2): Point C.
+            rgba (vec4): Colour.
+
+    - `@ti.func def polygon(self, x, y, rgba)`
+        Draw a filled polygon.
+        
+        Polygons are drawn according to the polygon mode, which can be "crossing" 
+        (default) or "winding". First, the bounding box of the polygon is calculated.
+        Then, we check if each pixel in the bounding box is inside the polygon. If it
+        is, we draw it (along with each neighbour pixel).
+
+        Reference for point in polygon inclusion testing:
+        http://www.dgp.toronto.edu/~mac/e-stuff/point_in_polygon.py
+
+        Args:
+            x (ti.template): X positions.
+            y (ti.template): Y positions.
+            rgba (vec4): Colour.
+        
+        TODO: fill arg
+
+    - `@ti.kernel def flip_x(self)`
+        Flip image in x-axis.
+
+    - `@ti.kernel def flip_y(self)`
+        Flip image in y-axis.
+
+    - `@ti.kernel def invert(self)`
+        Invert image.
+
+    - `@ti.kernel def decay(self, rate)`
+        Decay pixels.
+
+        Args:
+            rate (ti.f32): decay rate.
+
+    - `def blend_add(self, px)`
+        Blend by adding pixels together (Python scope).
+
+        Args:
+            px (ti.template): Pixels to blend with.
+
+    - `def blend_sub(self, px)`
+        Blend by subtracting pixels (Python scope).
+
+        Args:
+            px (ti.template): Pixels to blend with.
+
+    - `def blend_mul(self, px)`
+        Blend by multiplying pixels (Python scope).
+
+        Args:
+            px (ti.template): Pixels to blend with.
+
+    - `def blend_div(self, px)`
+        Blend by dividing pixels (Python scope).
+
+        Args:
+            px (ti.template): Pixels to blend with.
+
+    - `def blend_min(self, px)`
+        Blend by taking the minimum of each pixel (Python scope).
+
+        Args:
+            px (ti.template): Pixels to blend with.
+
+    - `def blend_max(self, px)`
+        Blend by taking the maximum of each pixel (Python scope).
+
+        Args:
+            px (ti.template): Pixels to blend with.
+
+    - `def blend_diff(self, px)`
+        Blend by taking the difference of each pixel (Python scope).
+
+        Args:
+            px (ti.template): Pixels to blend with.
+
+    - `def blend_diff_inv(self, px)`
+        Blend by taking the inverse difference of each pixel (Python scope).
+
+        Args:
+            px (ti.template): Pixels to blend with.
+
+    - `def blend_mix(self, px, amount)`
+        Blend by mixing pixels (Python scope).
+
+        Args:
+            px (ti.template): Pixels to blend with.
+            amount (ti.f32): Amount to mix.
+
+    - `@ti.kernel def blur(self, radius)`
+        Blur pixels.
+
+        Args:
+            radius (ti.i32): Blur radius.
+
+    - `def particles(self, particles, species, shape)`
+        Draw particles.
+
+        Args:
+            particles (ti.template): Particles.
+            species (ti.template): Species.
+            shape (str, optional): Shape. Defaults to "circle".
+
+    - `def rgba_from_px(self, px)`
+        Get rgba from pixels.
+
+        Args:
+            px (Any): Pixels to get rgba from.
+
+        Raises:
+            TypeError: If pixel field cannot be found.
+
+        Returns:
+            MatrixField: RGBA matrix field.
+
+    - `def __call__(self)`
+        Call returns pixels.
+
+
+## tolvera.rec
+
+- `@ti.data_oriented class VideoRecorder`
+    Video Recorder (WIP)
+    
+    Example:
+        from tolvera import Tolvera, run, VideoRecorder
+        def main(**kwargs):
+            tv = Tolvera(**kwargs)
+            vid = VideoRecorder(tv, **kwargs)
+            @tv.cleanup
+            def write():
+                vid.write()
+            @tv.render
+            def _():
+                vid()
+                tv.px.diffuse(0.99)
+                tv.v.flock(tv.p)
+                tv.px.particles(tv.p, tv.s.species())
+                return tv.px
+
+    - `def __init__(self, tolvera, **kwargs)`
+        Initialise a video recorder for a Tölvera program.
+
+        Args:
+            tolvera (Tolvera): Tölvera instance to record.
+            f (int): Number of frames to record. Defaults to 16.
+            r (int): Ratio of frames to record (tv.ti.fps/r). Defaults to 4.
+            c (int): Frame counter. Defaults to 0.
+            w (int): Width of video. Defaults to tv.x.
+            h (int): Height of video. Defaults to tv.y.
+            output_dir (str): Output directory. Defaults to './output'.
+            filename (str): Output filename. Defaults to 'output'.
+            automatic_build (bool): Automatically build video. Defaults to True.
+            build_mp4 (bool): Build mp4. Defaults to True.
+            build_gif (bool): Build gif. Defaults to False.
+            clean_frames (bool): Clean frames. Defaults to True.
+
+    - `@ti.kernel def rec(self, i)`
+        Record the current frame to the video.
+
+        Args:
+            i (ti.i32): Frame index.
+
+    - `@ti.kernel def dump(self, i)`
+        Dump the current frame to the video.
+
+        Args:
+            i (ti.i32): Frame index.
+
+    - `def write_frame(self, i)`
+        Write a frame to the video.
+
+        Args:
+            i (int): Frame index.
+
+    - `def write(self)`
+        Write all frames to the video and build if necessary.
+
+    - `def clean(self)`
+        Delete all previous image files in the saved directory.
+        
+        Fixed version, see https://github.com/taichi-dev/taichi/issues/8533
+
+    - `def step(self)`
+        Record the current frame and increment the frame counter.
+
+    - `def __call__(self, *args, **kwds)`
+        Record the current frame and increment the frame counter.
+
+
+## tolvera.sketchbook
+
+> Sketchbook module for listing and running sketches from the command line.
+> 
+> WIP.
+
+- `def list_sketches(sketchbook_folder, sort, direction)`
+    Lists all sketches in the given sketchbook folder.
+
+    Args:
+        sketchbook_folder (str): Path to the sketchbook folder. Defaults to current directory.
+        sort (str): Sort sketches by name, size, modified or created. Defaults to 'name'.
+        direction (str): Sort direction, either 'ascending' or 'descending'. Defaults to 'ascending'.
+
+- `def get_sketchbook_files(sketchbook_folder)`
+    Gets all sketch files from the sketchbook folder.
+
+    Args:
+        sketchbook_folder (str): Path to the sketchbook folder. Defaults to current directory.
+
+    Returns:
+        List[str]: List of sketch file names.
+
+- `def get_sketchbook_files_info(sketches, sketchbook_folder)`
+    Gets information about all sketch files in the sketchbook folder.
+
+    Args:
+        sketches (List[str]): List of sketch file names.
+        sketchbook_folder (str): Path to the sketchbook folder. Defaults to current directory.
+
+    Returns:
+        List[Dict[str, Any]]: List of sketch information dictionaries.
+
+- `def sort_sketch_files(sketch_files, sort, direction)`
+    Sorts sketch files by name, size, modified or created.
+
+    Args:
+        sort (str): Sort sketches by name, size, modified or created. Defaults to 'name'.
+        sketch_files (List[Dict[str, Any]]): List of sketch information dictionaries.
+        direction (str): Sort direction, either 'ascending' or 'descending'. Defaults to 'ascending'.
+
+    Returns:
+        List[Dict[str, Any]]: List of sorted sketch information dictionaries.
+
+- `def get_sketch_info(sketch_file, sketchbook_folder)`
+    Gets information about a specific sketch file.
+
+    Args:
+        sketch_file (str): Name of the sketch file.
+        sketchbook_folder (str): Path to the sketchbook folder. Defaults to current directory.
+
+    Returns:
+        Dict[str, Any]: Dictionary containing sketch information such as name, path, size, modified and created times.
+
+- `def pretty_print_sketchbook(sketches, sketchbook_folder)`
+    Pretty prints the sketchbook information.
+
+    Args:
+        sketches (List[Dict[str, Any]]): List of sketch information dictionaries.
+        sketchbook_folder (str): Path to the sketchbook folder. Defaults to current directory.
+
+- `def run_sketch_by_index(index, sketchbook_folder, *args, **kwargs)`
+    Runs a sketch by its index in the sketchbook.
+
+    Args:
+        index (int): Index of the sketch to run.
+        sketchbook_folder (str): Path to the sketchbook folder. Defaults to current directory.
+
+- `def run_sketch_by_name(sketch_file, sketchbook_folder, *args, **kwargs)`
+    Runs a sketch by its file name.
+
+    Args:
+        sketch_file (str): Name of the sketch file.
+        sketchbook_folder (str): Path to the sketchbook folder. Defaults to current directory.
+
+- `def run_random_sketch(sketchbook)`
+    Runs a random sketch from the sketchbook.
+
+    Args:
+        sketchbook (str): Path to the sketchbook folder. Defaults to current directory.
+
+- `def try_import_and_run_sketch(module_name, file_path, *args, **kwargs)`
+    Tries to import and run a sketch from a given file.
+
+    Args:
+        module_name (str): Name of the module.
+        file_path (str): Path to the file containing the module.
+
+- `def import_sketch(module_name, file_path)`
+    Imports a sketch from a given file.
+
+    Args:
+        module_name (str): Name of the module.
+        file_path (str): Path to the file containing the module.
+
+    Returns:
+        Any: Imported module.
+
+- `def run_sketch_function_from_module(module, function_name, file_path, *args, **kwargs)`
+    Runs a specific function from a given module.
+
+    Args:
+        module (Any): The imported module.
+        function_name (str): Name of the function to run.
+        file_path (str): Path to the file containing the module.
+
+- `def validate_sketchbook_path(sketchbook_folder)`
+    Validates if the given sketchbook folder exists.
+
+    Args:
+        sketchbook_folder (str): Path to the sketchbook folder. Defaults to current directory.
+
+    Raises:
+        SystemExit: If the sketchbook folder does not exist.
+
+- `def validate_sketch_file(sketch_file, sketchbook_folder)`
+    Validates if the given sketch file exists in the sketchbook folder.
+
+    Args:
+        sketch_file (str): Name of the sketch file.
+        sketchbook_folder (str): Path to the sketchbook folder. Defaults to current directory.
+
+    Raises:
+        SystemExit: If the sketch file does not exist.
+
+- `def main(*args, **kwargs)`
+    Main function for running the sketchbook from the command line.
+
+## tolvera.species
+
+> Species class.
+
+- `class Species`
+    Species in Tölvera.
+
+    Species are implemented as a State with attributes for `size`, `speed`, `mass` and
+    `colour` (rgba), and with a length determined by the number of species in the
+    Tölvera instance (`tv.sn`). The attributes are normalised and scaled by species the 
+    `species_consts` attribute. They are initialised with random values.
+
+    Rather than accessing this class directly, access is typically via the State
+    attributes via the Tölvera instance, via e.g. `tv.s.species.field[i].size`.
+
+    - `def __init__(self, tolvera, **kwargs)`
+        Initialise Species
+
+        Args:
+            tolvera (Tolvera): Tolvera instance.
+            **kwargs: Keyword arguments.
+
+    - `def randomise(self)`
+        Randomise species.
+
+
+## tolvera.state
+
+> State and StateDict classes for Tölvera.
+> 
+> Every Tölvera instance has a StateDict, which is a dictionary of State instances.
+> The StateDict is accessible via the 's' attribute of a Tölvera instance, and can
+> be used to create and access states.
+> 
+> Each State instance has a Taichi struct field and a corresponding NpNdarrayDict,
+> which handles OSC accessors and endpoints.
+
+- `class StateDict`
+    StateDict class for Tölvera.
+    
+    This class is a dictionary of State instances, and is accessible via the 's'
+    attribute of a Tölvera instance.
+
+    States can be created by assigning a dictionary or a tuple to a StateDict key.
+    and can be used in Taichi scope and Python scope respectively.
+
+    Example:
+        tv = Tolvera(**kwargs)
+
+        tv.s.mystate = {
+            "state": {
+                "id":  (ti.i32, 0, tv.pn - 1),
+                "pos": (ti.math.vec2, -1.0, 1.0),
+                "vel": (ti.math.vec2, -1.0, 1.0),
+            }, 
+            "shape": (tv.pn, 1), 
+            "osc": "get", 
+            "randomise": True
+        }
+
+        tv.s.mystate.field.pos[0] = 0.5
+
+    - `def __init__(self, tolvera)`
+        Initialise a StateDict for Tölvera.
+        
+        Args:
+            tolvera (Tolvera): Tolvera instance to which this StateDict belongs.
+
+    - `def set(self, name, kwargs)`
+        Set a state in the StateDict.
+
+        Args:
+            name (str): Name of the state.
+            kwargs (Any): State attributes.
+        
+        Raises:
+            ValueError: If the state is already in the StateDict.
+            Exception: If the state cannot be added.
+
+    - `def add(self, name, kwargs)`
+        Add a state to the StateDict.
+
+        Args:
+            name (str): Name of the state.
+            kwargs (Any): State attributes.
+
+        Raises:
+            TypeError: If kwargs is not a dict or tuple.
+
+    - `def from_vec(self, states, vector)`
+        Copy data from a vector to states in the StateDict.
+
+        Args:
+            states (list[str]): List of state names.
+            vector (list[float]): Vector of data to copy.
+
+        Raises:
+            Exception: If the vector is not the correct size.
+
+    - `def get_size(self, states)`
+        Return the size of the states in the StateDict.
+
+        Args:
+            states (str | list[str]): State name or list of state names.
+
+        Returns:
+            int: Size of the states.
+
+    - `def __setattr__(self, __name, __value)`
+        Set a state in the StateDict.
+
+        Args:
+            __name (str): Name of the state.
+            __value (Any): State attributes.
+
+
+- `@ti.data_oriented class State`
+    State class for Tölvera.
+    
+    This class takes a name, dictionary of state attributes, and a shape, and
+    creates a Taichi struct field and a corresponding dictionary of NumPy arrays 
+    (NpNdarrayDict) for a state.
+
+    The Taichi struct field can be used in Taichi scope, and the NpNdarrayDict
+    can be used in Python scope, and the two are kept in sync by the from_nddict()
+    and to_nddict() methods.
+
+    The State class also handles OSC accessors for the state, which use the
+    NpNdarrayDict to get and set data. A Tölvera instance is therefore required
+    to initialise a State instance.
+
+    State attributes are defined as a dictionary of attribute names and tuples of
+    (Taichi type, min value, max value). The domain of the attribute is used when
+    randomising the data in the state, and by OSCMap endpoints and client patches.
+
+    The state is n-dimensional based on the shape argument, and the NpNdarrayDict
+    provides methods for accessing the data in the state in n-dimensional slices.
+
+    Example:
+        ```py
+        tv.s.flock_p = {
+            "state": {
+                "separate": (ti.math.vec2, 0.0, 1.0),
+                "align": (ti.math.vec2, 0.0, 1.0),
+                "cohere": (ti.math.vec2, 0.0, 1.0),
+                "nearby": (ti.i32, 0, self.tv.p.n - 1),
+            },
+            "shape": self.tv.pn, # particle count
+            "osc": ("get"),
+            "randomise": False,
+        }
+        ```
+
+    - `def __init__(self, tolvera, name, state, shape, osc, randomise, methods)`
+        Initialise a state for Tölvera.
+
+        Args:
+            tolvera (Tolvera): Tolvera instance to which this state belongs.
+            name (str): Name of this state.
+            state (dict[str, tuple[DataType, Any, Any]]): Dict of state attributes.
+            shape (int | tuple[int], optional): Shape of the state. Defaults to 1.
+            methods (dict[str, Any], optional): Flag for OSC via iipyper. Defaults to False.
+
+    - `def setup_data(self, dict, shape, randomise, methods)`
+        Setup data structures and data for this state.
+
+        Args:
+            dict (dict[str, tuple[DataType, Any, Any]]): Dict of state attributes.
+            shape (int | tuple[int]): Shape of the state.
+            randomise (bool, optional): Flag to randomise the data on creation. Defaults to True.
+            methods (dict[str, Any], optional): Dict of Taichi field struct methods. Defaults to None.
+
+    - `def create_struct_field(self, dict, shape, methods)`
+        Create a Taichi struct field for this state.
+
+        Args:
+            dict (dict[str, tuple[DataType, Any, Any]]): Dict of state attributes.
+            shape (int | tuple[int]): Shape of the state.
+            methods (dict[str, Any], optional): Dict of Taichi field struct methods. Defaults to None.
+
+    - `def create_npndarray_dict(self)`
+        Create a NpNdarrayDict for this state.
+
+        Raises:
+            NotImplementedError: If no Numpy type is found for a Taichi type.
+
+    - `def randomise(self)`
+        Randomise the data in this state.
+
+    - `def randomise_attr(self, attr)`
+        Randomise an attribute in this state.
+
+        Args:
+            attr (str): Attribute name.
+
+    - `def setup_osc(self, osc)`
+        Setup OSC for this state.
+
+        Args:
+            osc (tuple | str, optional): ("get", "set", "stream"). Defaults to None.
+
+    - `def add_osc_setters(self)`
+    - `def add_osc_getters(self)`
+    - `def serialize(self)`
+    - `def deserialize(self, json_str)`
+    - `def save(self, path)`
+    - `def load(self, path)`
+    - `def from_nddict(self)`
+        Copy data from NpNdarrayDict to Taichi field.
+        
+        Raises:
+            Exception: If data cannot be copied.
+
+    - `def to_nddict(self)`
+        Copy data from Taichi field to NpNdarrayDict.
+
+        Raises:
+            Exception: If data cannot be copied.
+
+    - `def set_from_nddict(self, data)`
+        Copy data from NumPy array dict to Taichi field.
+
+        Args:
+            data (dict): NumPy array dict to copy.
+
+        Raises:
+            Exception: If data cannot be copied.
+
+    - `def from_vec(self, vec)`
+        Wrapper for NpNdarrayDict.from_vec().
+
+    - `def to_vec(self)`
+        Wrapper for NpNdarrayDict.to_vec().
+
+    - `def attr_from_vec(self, attr, vec)`
+        Wrapper for NpNdarrayDict.attr_from_vec().
+
+    - `def attr_to_vec(self, attr)`
+        Wrapper for NpNdarrayDict.attr_to_vec().
+
+    - `def slice_from_vec(self, slice_args, slice_vec)`
+        Wrapper for NpNdarrayDict.slice_from_vec().
+
+    - `def slice_to_vec(self, slice_args)`
+        Wrapper for NpNdarrayDict.slice_to_vec().
+
+    - `def attr_slice_from_vec(self, attr, slice_args, slice_vec)`
+        Wrapper for NpNdarrayDict.attr_slice_from_vec().
+
+    - `def attr_slice_to_vec(self, attr, slice_args)`
+        Wrapper for NpNdarrayDict.attr_slice_to_vec().
+
+    - `def attr_size(self, attr)`
+        Return the size of the attribute.
+
+    - `def fill(self, value)`
+        Fill the Taichi field with a value.
+
+    - `@ti.func def __getitem__(self, index)`
+        Return the Taichi field attribute.
+        
+        Args:
+            index (ti.i32): Attribute index.
+
+    - `def __call__(self, *args, **kwds)`
+        Return the Taichi field.
+
+
+## tolvera.taichi_
+
+> Taichi class for initialising Taichi and UI.
+
+- `class Taichi`
+    Taichi class for initialising Taichi and UI.
+    
+    This class provides a show method for showing the Taichi canvas.
+    It is used by the TolveraContext class to display a window.
+
+    - `def __init__(self, context, **kwargs)`
+        Initialise Taichi
+        
+        Args:
+            context (TolveraContext): global TolveraContext instance.
+            **kwargs: Keyword arguments:
+                gpu (str): GPU architecture to run on. Defaults to "vulkan".
+                cpu (bool): Run on CPU. Defaults to False.
+                fps (int): FPS limit. Defaults to 120.
+                seed (int): Random seed. Defaults to time.time().
+                headless (bool): Run headless. Defaults to False.
+                name (str): Window name. Defaults to "Tölvera".
+
+    - `def init_ti(self)`
+        Initialise Taichi backend on selected architecture.
+
+    - `def init_ui(self)`
+        Initialise Taichi UI window and canvas.
+
+    - `def show(self, px)`
+        Show Taichi canvas and show window.
+
+    - `def __call__(self, *args, **kwds)`
+        Call Taichi window show.
+
+
+## tolvera.tolvera_
+
+> Example:
+>     This example demonstrates the basic usage of Tölvera.
+>     It will display a window with a black background.
+>     ```py
+>     from tolvera import Tolvera, run
+> 
+>     def main(**kwargs):
+>         tv = Tolvera(**kwargs)
+> 
+>         @tv.render
+>         def _():
+>             return tv.px
+> 
+>     if __name__ == '__main__':
+>         run(main)
+>     ```
+> 
+> Example:
+>     Here's an annotated version of the above example:
+>     ```py
+>     # First, we import Tolvera and run() from tolvera.
+>     from tolvera import Tolvera, run
+> 
+>     # Then, we define a main function which takes in keyword arguments 
+>     # (kwargs) from the command line.
+>     def main(**kwargs):
+>         # Inside the main function, we initialise a Tolvera instance 
+>         # with the given keyword arguments.
+>         tv = Tolvera(**kwargs)
+> 
+>         # We use the render() decorator to render the pixels.
+>         # This function can be named anything. 
+>         # It will run in a loop until the user exits the program.
+>         @tv.render
+>         def _():
+>             # render() must return Pixels. Often, these pixels will be 
+>             # the pixels of the Tolvera instance, accessed with tv.px.
+>             return tv.px
+> 
+>     # Finally, we call run() with the main function as the argument.
+>     if __name__ == '__main__':
+>         run(main)
+>     ```
+> 
+> When Tolvera is run, messages will be printed to the console.
+> These messages inform the user of the status of Tolvera,
+> during initialisation, setup, and running.
+
+- `class Tolvera`
+    Tolvera main class.
+
+    Attributes:
+        `name` (str): Name of Tölvera instance. 
+        `ctx` (TolveraContext): Shared TolveraContext.
+        `speed` (float): Global timebase speed.
+        `pn` (int): Number of particles.
+        `sn` (int): Number of species.
+        `p_per_s` (int): Number of particles per species.
+        `substep` (int): Number of substeps per frame.
+        `iml`: Dict of IML instances via anguilla.
+        `cv`: computer vision integration via OpenCV.
+        `osc`: OSC via iipyper.
+        `ti`: Taichi (graphics backend).
+
+    - `def __init__(self, **kwargs)`
+        Initialise and setup Tölvera with given keyword arguments.
+
+        Args:
+            name (str): Name of Tölvera instance. Defaults to "Tölvera".
+            ctx (TolveraContext): TolveraContext to share. Defaults to None.
+            see also kwargs for Tolvera.setup().
+
+    - `def init_context(self, **kwargs)`
+        Initiliase TölveraContext with given keyword arguments.
+
+        Args:
+            **kwargs: Keyword arguments for TölveraContext.
+
+    - `def share_context(self, context)`
+        Share TölveraContext with another Tölvera instance.
+
+        Args:
+            context: TölveraContext to share.
+
+    - `def setup(self, **kwargs)`
+        Setup Tölvera with given keyword arguments.
+        This can be called multiple throughout the lifetime of a Tölvera instance.
+
+        Args:
+            **kwargs: Keyword arguments for setup.
+                speed (float): Global timebase speed. Defaults to 1.
+                particles (int): Number of particles. Defaults to 1024.
+                species (int): Number of species. Defaults to 4.
+                substep (int): Number of substeps per frame. Defaults to 1.
+            See also kwargs for Pixels, Species, Particles, and Vera.
+
+    - `def randomise(self)`
+        Randomise particles, species, and Vera.
+
+    - `def reset(self, **kwargs)`
+        Reset Tölvera with given keyword arguments.
+        This will call setup() with given keyword arguments, but not init().
+
+        Args:
+            **kwargs: Keyword arguments for reset.
+
+    - `def speed(self, speed)`
+        Set or get global timebase speed.
+
+    - `def add_to_osc_map(self)`
+        Add top-level Tölvera functions to OSCMap.
+
+
+## tolvera.utils
+
+> Utility functions for Tolvera.
+
+- `class CONSTS`
+    Dict of CONSTS that can be used in Taichi scope
+
+    - `def __init__(self, dict)`
+    - `def __getattr__(self, name)`
+    - `def __getitem__(self, name)`
+
+- `def time_function(func, *args, **kwargs)`
+    Time how long it takes to run a function and print the result
+
+- `def validate_path(path)`
+    Validate a path using os.path and pathlib.
+
+    Args:
+        path (str): The path to be validated.
+
+    Returns:
+        bool: True if the path is valid, raises an exception otherwise.
+
+    Raises:
+        TypeError: If the input is not a string.
+        FileNotFoundError: If the path does not exist.
+        PermissionError: If the path is not accessible.
+
+- `def validate_json_path(path)`
+    Validate a JSON file path. It uses validate_path for initial validation.
+
+    Args:
+        path (str): The JSON file path to be validated.
+
+    Returns:
+        bool: True if the path is a valid JSON file path, raises an exception otherwise.
+
+    Raises:
+        ValueError: If the path does not end with '.json'.
+
+- `class dotdict`
+    dot.notation access to dictionary attributes
+
+
+- `def flatten(lst)`
+    Flatten a nested list or return a non-nested list as is.
+
+- `class Lag`
+    - `def __init__(self, val, coef)`
+    - `def __call__(self, val, coef)`
+
+- `@ti.data_oriented class LagVec2`
+    - `def __init__(self, coef)`
+    - `def __call__(self, new)`
+
+- `def create_and_validate_slice(arg, target_array)`
+    Creates and validates a slice object based on the target array.
+
+- `def create_safe_slice(arg)`
+    Creates a slice object based on the input argument.
+
+    Args:
+        arg (int, tuple, slice): The argument for creating the slice. It can be an integer,
+                                 a tuple with slice parameters, or a slice object itself.
+
+    Returns:
+        slice: A slice object created based on the provided argument.
+
+- `def create_ndslices(dims)`
+    Create a multi-dimensional slice from a list of tuples.
+
+    Args:
+        dims (list[tuple]): A list of tuples containing the slice parameters for each dimension.
+
+    Returns:
+        np.s_: A multi-dimensional slice object.
+
+- `def generic_slice(array, slice_params)`
+    Slices a NumPy array based on a tuple of slice parameters for each dimension.
+
+    Args:
+        array (np.ndarray): The array to be sliced.
+        slice_params (tuple): A tuple where each item is either an integer, a tuple with
+                             slice parameters, or a slice object.
+
+    Returns:
+        ndarray: The sliced array.
+
+- `def validate_slice(slice_obj, target_array)`
+    Validates if the given slice object is applicable to the target ndarray.
+
+    Args:
+        slice_obj (tuple[slice]): A tuple containing slice objects for each dimension.
+        target_array (np.ndarray): The array to be sliced.
+
+    Returns:
+        bool: True if the slice is valid for the given array, False otherwise.
+
+## tolvera.vera
+
+> The Vera module provides a wrapper for all available forces and behaviours.
+
+- `class Vera`
+    The Vera class provides a wrapper for all available forces and behaviours,
+    that can be applied to a Tolvera entities such as the Particle system.
+
+    - `def __init__(self, tolvera, **kwargs)`
+        Initialise the Vera class.
+        
+        Args:
+            tolvera (Tolvera): A Tolvera instance.
+            **kwargs: Keyword arguments passed to the Vera.
+
+    - `def add_forces_to_self(self)`
+        Add all forces to the Vera instance.
+
+    - `def randomise(self)`
+        Randomise all forces and behaviours.
+
+
+## tolvera.vera.flock
+
+> Flock behaviour based on the Boids algorithm.
+
+- `@ti.data_oriented class Flock`
+    Flock behaviour.
+    
+    The flock operates via a species rule matrix, which is a 2D matrix of species 
+    rules, such that every species has a separate relationship with every other 
+    species including itself. As in the Boids algorithm, the rules are:
+    - `separate`: how much a particle should separate from its neighbours.
+    - `align`: how much a particle should align (match velocity) with its neighbours.
+    - `cohere`: how much a particle should cohere (move towards) its neighbours.
+
+    Taichi Boids implementation inspired by:
+    https://forum.taichi-lang.cn/t/homework0-boids/563
+
+    - `def __init__(self, tolvera, **kwargs)`
+        Initialise the Flock behaviour.
+
+        `flock_s` stores the species rule matrix. 
+        `flock_p` stores the rule values per particle, and the number of neighbours.
+        `flock_dist` stores the distance between particles.
+
+        Args:
+            tolvera (Tolvera): A Tolvera instance.
+            **kwargs: Keyword arguments (currently none).
+
+    - `def randomise(self)`
+        Randomise the Flock behaviour.
+
+    - `def randomise_attr(self, attr)`
+        Randomise a specific attribute of the Flock behaviour.
+
+        Args:
+            attr (str): The attribute to randomise.
+
+    - `@ti.kernel def step(self, particles, weight)`
+        Step the Flock behaviour.
+
+        Pairwise comparison is made and inactive particles are ignored. 
+        When the distance between two particles is less than the radius 
+        of the species, the particles are considered neighbours. 
+        
+        The separation, alignment and cohesion are calculated for
+        each particle and the velocity is updated accordingly.
+
+        State is updated in `flock_p` and `flock_dist`.
+
+        Args:
+            particles (ti.template()): A template for the particles.
+            weight (ti.f32): The weight of the Flock behaviour.
+
+    - `def __call__(self, particles, weight)`
+        Call the Flock behaviour.
+
+        Args:
+            particles (Particles): Particles to step.
+            weight (ti.f32, optional): The weight of the Flock behaviour. Defaults to 1.0.
+
+
+## tolvera.vera.forces
+
+> Force functions for particles.
+> 
+> This module contains functions for applying forces to particles.
+> It includes functions for moving, attracting, repelling and gravitating particles.
+> It also includes variations of these functions for specific species of particles.
+
+- `@ti.kernel def move(particles, weight)`
+    Move the particles.
+
+    Args:
+        particles (ti.template): Particles.
+
+- `@ti.kernel def attract(particles, pos, mass, radius)`
+    Attract the particles to a position.
+
+    Args:
+        particles (ti.template): Particles.
+        pos (ti.math.vec2): Attraction position.
+        mass (ti.f32): Attraction mass.
+        radius (ti.f32): Attraction radius.
+
+- `@ti.kernel def attract_species(particles, pos, mass, radius, species)`
+    Attract the particles of a given species to a position.
+
+    Args:
+        particles (ti.template): Particles.
+        pos (ti.math.vec2): Attraction position.
+        mass (ti.f32): Attraction mass.
+        radius (ti.f32): Attraction radius.
+        species (ti.i32): Species index.
+
+- `@ti.func def attract_particle(p, pos, mass, radius)`
+    Attract a particle to a position.
+
+    Args:
+        particles (Particle): Individual particle.
+        pos (ti.math.vec2): Attraction position.
+        mass (ti.f32): Attraction mass.
+        radius (ti.f32): Attraction radius.
+
+    Returns:
+        ti.math.vec2: Attraction velocity.
+
+- `@ti.kernel def repel(particles, pos, mass, radius)`
+    Repel the particles from a position.
+
+    Args:
+        particles (ti.template): Particles.
+        pos (ti.math.vec2): Repulsion position.
+        mass (ti.f32): Repulsion mass.
+        radius (ti.f32): Repulsion radius.
+
+- `@ti.kernel def repel_species(particles, pos, mass, radius, species)`
+    Repel the particles of a given species from a position.
+
+    Args:
+        particles (ti.template): Particles.
+        pos (ti.math.vec2): Repulsion position.
+        mass (ti.f32): Repulsion mass.
+        radius (ti.f32): Repulsion radius.
+        species (ti.i32): Species index.
+
+- `@ti.func def repel_particle(p, pos, mass, radius)`
+    Repel a particle from a position.
+
+    Args:
+        p (Particle): Individual particle.
+        pos (ti.math.vec2): Repulsion position.
+        mass (ti.f32): Repulsion mass.
+        radius (ti.f32): Repulsion radius.
+
+    Returns:
+        ti.math.vec2: Repulsion velocity.
+
+- `@ti.kernel def gravitate(particles, G, radius)`
+    Gravitate the particles.
+
+    Args:
+        particles (ti.template): Particles.
+        G (ti.f32): Gravitational constant.
+        radius (ti.f32): Gravitational radius.
+
+- `@ti.kernel def gravitate_species(particles, G, radius, species)`
+    Gravitate the particles of a given species.
+
+    Args:
+        particles (ti.template): Particles.
+        G (ti.f32): Gravitational constant.
+        radius (ti.f32): Gravitational radius.
+        species (ti.i32): Species index.
+
+- `@ti.func def gravitation(p1, p2, G)`
+    Calculate the gravitational force between two particles.
+
+    Args:
+        p1 (Particle): Particle 1.
+        p2 (Particle): Particle 2.
+        G (ti.f32): Gravitational constant.
+
+    Returns:
+        ti.math.vec2: Gravitational force.
+
+- `@ti.kernel def noise(particles, weight)`
+    Add noise to the particles.
+
+    Args:
+        particles (ti.template): Particles.
+        weight (ti.f32): Noise weight.
+
+- `@ti.kernel def centripetal(particles, centre, direction, weight)`
+    Apply a centripetal force to the particles.
+
+    Args:
+        particles (ti.template): Particles.
+        centre (ti.math.vec2): Centripetal centre.
+        direction (ti.i32): Centripetal direction.
+        weight (ti.f32): Centripetal weight.
+
+- `@ti.func def centripetal_particle(p, centre, direction, weight)`
+    Apply a centripetal force to a particle.
+
+    Args:
+        p (Particle): Individual particle.
+        centre (ti.math.vec2): Centripetal centre.
+        direction (ti.i32): Centripetal direction.
+        weight (ti.f32): Centripetal weight.
+
+    Returns:
+        ti.math.vec2: Centripetal velocity.
+
+## tolvera.vera.gol
+
+> Game of Life based on Taichi example
+> 
+> "In memory of John Horton Conway (1937 - 2020)"
+> 
+> https://github.com/taichi-dev/taichi/blob/master/python/taichi/examples/simulation/game_of_life.py
+
+- `@ti.data_oriented class GOL`
+    - `def __init__(self, tolvera, **kwargs)`
+        Game of Life based on Taichi example.
+
+        Args:
+            tolvera (Tolvera): A Tolvera instance.
+            gol_n (int, optional): The number of cells. Defaults to 64.
+            gol_speed (float, optional): The speed factor. Defaults to 1.
+            gol_cell_size (int, optional): The size of each cell. Defaults to 8.
+            gol_B (list, optional): The birth rules. Defaults to [3].
+            gol_S (list, optional): The survival rules. Defaults to [2, 3].
+            gol_alive_c (list, optional): The colour of alive cells. Defaults to [1.0, 1.0, 1.0, 1.0].
+            gol_dead_c (list, optional): The colour of dead cells. Defaults to [0.0, 0.0, 0.0, 1.0].
+            gol_random (float, optional): The randomisation factor. Defaults to 0.8.
+
+    - `def init(self)`
+    - `def randomise(self)`
+        Randomise the rules.
+
+    - `@ti.kernel def set_substep(self)`
+    - `def set_speed(self, speed)`
+    - `@ti.func def get_alive(self, i, j)`
+    - `@ti.func def get_count(self, i, j)`
+    - `@ti.func def calc_rule(self, a, c)`
+    - `@ti.func def count_neighbours(self)`
+    - `@ti.func def update_alive(self)`
+    - `@ti.func def cell_from_point(pos)`
+        if gx <= x < gx + gw and gy <= y < gy + gh:
+            i, j = int((x - gx) / gc), int((y - gy) / gc)
+
+    - `@ti.func def fill_area(self, x, y, w, h, alive)`
+    - `@ti.kernel def run(self)`
+    - `@ti.kernel def draw(self)`
+    - `def step(self)`
+    - `def __call__(self, *args, **kwds)`
+
+## tolvera.vera.particle_life
+
+> Particle Life model.
+
+- `@ti.data_oriented class ParticleLife`
+    Particle Life model.
+
+    The Particle Life model is a simple model of particle behaviour, where
+    particles are either attracted or repelled by other particles, depending
+    on their species. Popularised by Jeffrey Ventrella (Clusters), Tom Mohr
+    and others:
+
+    https://www.ventrella.com/Clusters/
+    https://github.com/tom-mohr/particle-life-app
+
+    - `def __init__(self, tolvera, **kwargs)`
+        Initialise the Particle Life model.
+
+        'plife' stores the species rule matrix.
+
+        Args:
+            tolvera (Tolvera): A Tolvera instance.
+            **kwargs: Keyword arguments (currently none).
+
+    - `@ti.kernel def step(self, particles, weight)`
+        Step the Particle Life model.
+
+        Args:
+            particles (Particles.field): The particles to step.
+            weight (ti.f32): The weight of the step.
+
+    - `def __call__(self, particles, weight)`
+        Call the Particle Life model.
+
+        Args:
+            particles (Particles): The particles to step.
+
+
+## tolvera.vera.reaction_diffusion
+
+> Inspired by https://github.com/taichi-dev/faster-python-with-taichi/blob/main/reaction_diffusion_taichi.py
+
+- `@ti.data_oriented class ReactionDiffusion`
+    - `def __init__(self, tolvera, **kwargs)`
+    - `def init(self)`
+    - `def reset(self)`
+    - `def randomise(self)`
+    - `def add_to_osc_map(self)`
+    - `def make_palette(self)`
+    - `@ti.kernel def deposit_particles(self, particles)`
+    - `@ti.kernel def compute(self, phase)`
+    - `@ti.kernel def render(self)`
+    - `def process(self)`
+    - `def __call__(self)`
+
+## tolvera.vera.slime
+
+> Slime behaviour based on the Physarum polycephalum slime mould.
+
+- `@ti.data_oriented class Slime`
+    Slime behaviour based on the Physarum polycephalum slime mould.
+    
+    The slime mould is a single-celled organism that exhibits complex behaviour
+    such as foraging, migration, and decision-making. It is a popular model for
+    emergent behaviour in nature-inspired computing.
+    
+    The slime mould is simulated by a set of particles that move around the
+    simulation space. The particles sense their environment and move in response
+    to the sensed information. The particles leave a "pheromone trail" behind them,
+    which evaporates over time. The particles can be of different species, which 
+    have different sensing and moving parameters.
+    
+    Taichi Physarum implementation inspired by:
+    https://github.com/taichi-dev/taichi/blob/master/python/taichi/examples/simulation/physarum.py
+
+    - `def __init__(self, tolvera, **kwargs)`
+        Initialise the Slime behaviour.
+
+        `slime_p` stores the particle state.
+        `slime_s` stores the species state.
+        `trail` is a Pixels instance that stores the pheromone trail.
+        
+        Args:
+            tolvera (Tolvera): A Tolvera instance.
+            evaporate (ti.f32, optional): Evaporation rate. Defaults to 0.99.
+            **kwargs: Keyword arguments.
+                brightness (ti.f32, optional): Brightness of the pheromone trail. Defaults to 1.0.
+
+    - `def randomise(self)`
+        Randomise the Slime behaviour.
+
+    - `@ti.kernel def move(self, field, weight)`
+        Move the particles based on the sensed environment.
+
+        Each particle senses the trail to its left, centre and right. Depending on the 
+        strength of the sensed trail in each direction, and the species parameters,
+        a movement angle is calculated. The particle moves in this direction by a 
+        distance proportional to its active state and the weight parameter.
+
+        Args:
+            field (ti.template): Particle field.
+            weight (ti.f32): Weight of the movement.
+
+    - `@ti.func def sense(self, pos, ang, dist)`
+        Sense the trail at a given position and angle.
+
+        Args:
+            pos (ti.math.vec2): Position.
+            ang (ti.f32): Angle.
+            dist (ti.f32): Distance.
+
+        Returns:
+            ti.math.vec4: RGBA value of the sensed trail point.
+
+    - `@ti.func def sense_rgba(self, pos, ang, dist, rgba)`
+        Sense the trail at a given position and angle and return a weighted RGBA value.
+
+        Args:
+            pos (ti.math.vec2): Position.
+            ang (ti.f32): Angle.
+            dist (ti.f32): Distance.
+            rgba (ti.math.vec4): RGBA value.
+        
+        Returns:
+            ti.math.vec4: Weighted RGBA value.
+
+    - `@ti.kernel def deposit_particles(self, particles, species)`
+        Deposit particles onto the trail.
+
+        Args:
+            particles (ti.template): Particle field.
+            species (ti.template): Species field.
+
+    - `def step(self, particles, species, weight)`
+        Step the Slime behaviour.
+
+        Args:
+            particles (Particles): A Particles instance.
+            species (Species): A Species instance.
+            weight (ti.f32, optional): Weight parameter. Defaults to 1.0.
+
+    - `def __call__(self, particles, species, weight)`
+        Call the Slime behaviour.
+
+        Args:
+            particles (Particles): A Particles instance.
+            species (Species): A Species instance.
+            weight (ti.f32, optional): Weight parameter. Defaults to 1.0.
+
+        Returns:
+            Pixels: A Pixels instance containing the pheromone trail.
+
+
+## tolvera.vera.swarmalators
+
+> Based on https://www.complexity-explorables.org/explorables/swarmalators/
+
+- `@ti.data_oriented class Swarmalators`
+    - `def __init__(self, tolvera, **kwargs)`
+    - `@ti.kernel def init(self)`
+    - `@ti.func def set_presets(self)`
+    - `@ti.func def reset(self)`
+    - `@ti.kernel def perturb(self)`
+    - `@ti.kernel def step(self, particles, preset, weight)`
+    - `@ti.func def dist_euclid(self, p1, p2)`
+    - `@ti.func def X(self, x)`
+    - `@ti.func def Y(self, y)`
+    - `def __call__(self, particles, preset, weight)`
+
