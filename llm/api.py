@@ -99,6 +99,7 @@ if __name__ == '__main__':
                 yield chunk.content
     
 
+# example usage testing
 if __name__ == "__main__":
     llm = LLM()
     query = "What is Tolvera?"
