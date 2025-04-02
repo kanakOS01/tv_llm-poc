@@ -1,17 +1,19 @@
 """
-Template for a 'verur'-style class that performs 
+Template for a 'verur'-style class that performs
 pair-wise comparison of particles (tv.p).
 """
 
 import taichi as ti
+
 from ..utils import CONSTS
+
 
 @ti.data_oriented
 class VerurTemplate:
     """
-    Template for a 'verur'-style class that performs 
+    Template for a 'verur'-style class that performs
     pair-wise comparison of particles (tv.p).
-    
+
     Example:
         tv = Tolvera(**kwargs)
         verur = VerurTemplate(tv, **kwargs)
@@ -20,10 +22,11 @@ class VerurTemplate:
             verur(tv.p) # Call the behaviour
             return tv.px
     """
+
     def __init__(self, tolvera, **kwargs):
         """Initialise the behaviour.
 
-        `tmp_s` stores the species rule matrix. 
+        `tmp_s` stores the species rule matrix.
         `tmp_p` stores the rule values per particle.
 
         Args:
@@ -41,7 +44,8 @@ class VerurTemplate:
             "state": {
                 "a": (ti.f32, 0.01, 1.0),
                 "b": (ti.f32, 0.01, 1.0),
-            }, "shape": (self.tv.sn, self.tv.sn),
+            },
+            "shape": (self.tv.sn, self.tv.sn),
             "randomise": True,
         }
         # Per-particle state
@@ -49,7 +53,8 @@ class VerurTemplate:
             "state": {
                 "a": (ti.f32, 0.01, 1.0),
                 "b": (ti.f32, 0.01, 1.0),
-            }, "shape": self.tv.pn,
+            },
+            "shape": self.tv.pn,
             "randomise": False,
         }
 
@@ -82,7 +87,9 @@ class VerurTemplate:
                 species = self.tv.s.tmp_s[p1.species, p2.species]
                 """Do something here using species.a|b to affect particles[i]..."""
                 # Update tv.p particle state, proportional to weight
-                particles[i].vel += (species.a + species.b)/2 * p1.speed * p1.active * weight
+                particles[i].vel += (
+                    (species.a + species.b) / 2 * p1.speed * p1.active * weight
+                )
                 particles[i].pos += particles[i].vel
                 # Update VerurTemplate particle state
                 self.tv.s.tmp_p[i] = self.tv.s.tmp_p.struct(species.a, species.b)

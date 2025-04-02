@@ -1,5 +1,6 @@
 from tolvera import Tolvera, run
 
+
 def main(**kwargs):
     tv = Tolvera(**kwargs)
 
@@ -8,5 +9,6 @@ def main(**kwargs):
         tv.v.flock(tv.p)
         return tv.v.slime(tv.p, tv.s.species())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

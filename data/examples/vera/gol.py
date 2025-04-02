@@ -1,5 +1,7 @@
 import taichi as ti
+
 from tolvera import Tolvera, run
+
 
 def main(**kwargs):
     tv = Tolvera(x=1000, y=1000, gol_alive_c=[0.8, 0.8, 0.3, 0.5])
@@ -21,5 +23,6 @@ def main(**kwargs):
     #     draw(s)
     #     return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

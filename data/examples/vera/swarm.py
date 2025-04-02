@@ -1,5 +1,7 @@
 import taichi as ti
+
 from tolvera import Tolvera, run
+
 
 def main(**kwargs):
     tv = Tolvera(**kwargs)
@@ -10,19 +12,20 @@ def main(**kwargs):
         for i in range(tv.p.n):
             p = particles.field[i]
             ps = tv.s.swarm_p[i]
-            if p.active == 0.0: continue
+            if p.active == 0.0:
+                continue
             px = ti.cast(p.pos[0], ti.i32)
             py = ti.cast(p.pos[1], ti.i32)
-            rgba = color_map_1d(ps.color, .1, .3, .7) * tv.px.CONSTS.BRIGHTNESS
+            rgba = color_map_1d(ps.color, 0.1, 0.3, 0.7) * tv.px.CONSTS.BRIGHTNESS
             tv.px.circle(px, py, 3, rgba)
 
     @ti.func
-    def color_map_1d(val, r=0., g=0., b=0.):
+    def color_map_1d(val, r=0.0, g=0.0, b=0.0):
         """Weighted colormap"""
         val = 1 - val
-        r = ti.max(.2, 1 - ti.abs(val - r))
-        g = ti.max(.2, 1 - ti.abs(val - g))
-        b = ti.max(.2, 1 - ti.abs(val - b))
+        r = ti.max(0.2, 1 - ti.abs(val - r))
+        g = ti.max(0.2, 1 - ti.abs(val - g))
+        b = ti.max(0.2, 1 - ti.abs(val - b))
         return ti.Vector([r, g, b, 1])
 
     @tv.render
@@ -33,5 +36,6 @@ def main(**kwargs):
         draw_swarm_particles(tv.p)
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

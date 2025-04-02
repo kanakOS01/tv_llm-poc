@@ -6,13 +6,15 @@ Example:
 """
 
 import taichi as ti
+
 from tolvera import Tolvera, run
+
 
 def main(**kwargs):
     tv = Tolvera(**kwargs)
 
-    gx = tv.x/2 - tv.v.gol.px.px.shape[0]/2
-    gy = tv.y/2 - tv.v.gol.px.px.shape[1]/2
+    gx = tv.x / 2 - tv.v.gol.px.px.shape[0] / 2
+    gy = tv.y / 2 - tv.v.gol.px.px.shape[1] / 2
     gw, gh = tv.v.gol.w, tv.v.gol.h
     gn, gc = tv.v.gol.n, tv.v.gol.cell_size
 
@@ -23,9 +25,9 @@ def main(**kwargs):
     @ti.kernel
     def cells_to_flock():
         for i, j in tv.s.gol_cells.field:
-            cell = tv.s.gol_cells.field[i,j]
+            cell = tv.s.gol_cells.field[i, j]
             if cell.alive:
-                tv.v._attract(tv.p, ti.Vector([i*gc + gx, j*gc + gy]), 1, 100)
+                tv.v._attract(tv.p, ti.Vector([i * gc + gx, j * gc + gy]), 1, 100)
 
     @ti.kernel
     def flock_to_cells():
@@ -47,5 +49,6 @@ def main(**kwargs):
         tv.px.particles(tv.p, tv.s.species())
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

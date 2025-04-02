@@ -6,15 +6,16 @@ Example:
 
 from tolvera import Tolvera, run
 
+
 def main(**kwargs):
     tv = Tolvera(**kwargs)
 
-    if kwargs.get('iml', False):
+    if kwargs.get("iml", False):
         tv.iml.slime_p2slime_s = {
-            'type': 'fun2fun', 
-            'size': (tv.s.slime_p.size, tv.s.slime_s.size), 
-            'io': (tv.s.slime_p.to_vec, tv.s.slime_s.from_vec),
-            'randomise': True,
+            "type": "fun2fun",
+            "size": (tv.s.slime_p.size, tv.s.slime_s.size),
+            "io": (tv.s.slime_p.to_vec, tv.s.slime_s.from_vec),
+            "randomise": True,
         }
 
     @tv.render
@@ -27,5 +28,6 @@ def main(**kwargs):
         tv.px.particles(tv.p, tv.s.species())
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

@@ -1,6 +1,8 @@
+from signalflow import *
+
 from tolvera import Tolvera, run
 from tolvera.osc.update import Updater
-from signalflow import *
+
 
 def main(**kwargs):
     tv = Tolvera(**kwargs)
@@ -27,5 +29,6 @@ def main(**kwargs):
         updater()
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

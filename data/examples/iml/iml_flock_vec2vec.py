@@ -11,32 +11,34 @@ Example
 
 from tolvera import Tolvera, run
 
+
 def main(**kwargs):
     tv = Tolvera(**kwargs)
 
     tv.iml.flock_p2flock_s = {
-        'size': (tv.s.flock_p.size, tv.s.flock_s.size), 
-        'io': (list, list),
-        'randomise': True,
-        'config': {'interpolate': 'Ripple'},
-        'map_kw': {'k': 10, 'ripple_depth': 5, 'ripple': 5}
+        "size": (tv.s.flock_p.size, tv.s.flock_s.size),
+        "io": (list, list),
+        "randomise": True,
+        "config": {"interpolate": "Ripple"},
+        "map_kw": {"k": 10, "ripple_depth": 5, "ripple": 5},
     }
 
     def update():
         invec = tv.s.flock_p.to_vec()
-        tv.iml.i = {'flock_p2flock_s': invec}
-        flock_s_outvec = tv.iml.o['flock_p2flock_s']
+        tv.iml.i = {"flock_p2flock_s": invec}
+        flock_s_outvec = tv.iml.o["flock_p2flock_s"]
         if flock_s_outvec is not None:
             tv.s.flock_s.from_vec(flock_s_outvec)
-    
+
     @tv.render
     def _():
         update()
         tv.px.diffuse(0.99)
         tv.p()
         tv.v.flock(tv.p)
-        tv.px.particles(tv.p, tv.s.species, 'circle')
+        tv.px.particles(tv.p, tv.s.species, "circle")
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

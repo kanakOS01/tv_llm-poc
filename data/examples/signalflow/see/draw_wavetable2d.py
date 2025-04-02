@@ -3,8 +3,10 @@ Draws a stereo buffer as an XY Lissajous curve.
 """
 
 import taichi as ti
-from tolvera import Tolvera, run
 from signalflow import *
+
+from tolvera import Tolvera, run
+
 
 def main(**kwargs):
     tv = Tolvera(**kwargs)

@@ -3,7 +3,9 @@ Draw `tv.v.flock` particle states (`tv.s.flock_p`).
 """
 
 import taichi as ti
+
 from tolvera import Tolvera, run
+
 
 def main(**kwargs):
     tv = Tolvera(**kwargs)
@@ -17,28 +19,27 @@ def main(**kwargs):
             p1 = tv.p.field[i]
             fp = tv.s.flock_p[i]
             c = tv.s.species[p1.species].rgba
-            r = ti.Vector([1.,0.,0.,1.])
-            g = ti.Vector([0.,1.,0.,1.])
-            b = ti.Vector([0.,0.,1.,1.])
+            r = ti.Vector([1.0, 0.0, 0.0, 1.0])
+            g = ti.Vector([0.0, 1.0, 0.0, 1.0])
+            b = ti.Vector([0.0, 0.0, 1.0, 1.0])
             tv.px.line(
-                p1.pos.x, p1.pos.y, 
-                p1.pos.x + fp.separate.x, 
-                p1.pos.y + fp.separate.y, 
-                r)
+                p1.pos.x,
+                p1.pos.y,
+                p1.pos.x + fp.separate.x,
+                p1.pos.y + fp.separate.y,
+                r,
+            )
             tv.px.line(
-                p1.pos.x, p1.pos.y, 
-                p1.pos.x + fp.align.x * 100., # bug
-                p1.pos.y + fp.align.y * 100., # bug
-                g)
+                p1.pos.x,
+                p1.pos.y,
+                p1.pos.x + fp.align.x * 100.0,  # bug
+                p1.pos.y + fp.align.y * 100.0,  # bug
+                g,
+            )
             tv.px.line(
-                p1.pos.x, p1.pos.y, 
-                p1.pos.x + fp.cohere.x, 
-                p1.pos.y + fp.cohere.y, 
-                b)
-            tv.px.circle(
-                p1.pos.x, p1.pos.y, 
-                fp.nearby/10,
-                c)
+                p1.pos.x, p1.pos.y, p1.pos.x + fp.cohere.x, p1.pos.y + fp.cohere.y, b
+            )
+            tv.px.circle(p1.pos.x, p1.pos.y, fp.nearby / 10, c)
 
     @tv.render
     def _():
@@ -47,5 +48,6 @@ def main(**kwargs):
         tv.v.flock(tv.p)
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

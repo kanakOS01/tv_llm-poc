@@ -1,15 +1,19 @@
 import numpy as np
 import taichi as ti
+
 from tolvera import Tolvera, run
+
 
 def main(**kwargs):
     tv = Tolvera(**kwargs)
 
-    @ti.kernel    
+    @ti.kernel
     def attract():
         for p in range(tv.pn):
             x, y = tv.s.pose[p % 33].px
-            tv.p.field[p].vel += tv.v.attract_particle(tv.p.field[p], ti.Vector([x, y]), 1000, tv.x)
+            tv.p.field[p].vel += tv.v.attract_particle(
+                tv.p.field[p], ti.Vector([x, y]), 1000, tv.x
+            )
 
     @tv.render
     def _():
@@ -24,5 +28,6 @@ def main(**kwargs):
         tv.px.particles(tv.p, tv.s.species())
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

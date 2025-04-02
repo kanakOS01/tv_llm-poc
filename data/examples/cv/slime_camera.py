@@ -6,6 +6,7 @@ Example:
 
 from tolvera import Tolvera, run
 
+
 def main(**kwargs):
     tv = Tolvera(**kwargs)
 
@@ -17,5 +18,6 @@ def main(**kwargs):
         tv.px.particles(tv.p, tv.s.species())
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

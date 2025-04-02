@@ -7,7 +7,9 @@ Some are @ti.func which can only be called from @ti.kernel functions, or other @
 """
 
 import taichi as ti
+
 from tolvera import Tolvera, run
+
 
 def main(**kwargs):
     tv = Tolvera(**kwargs)
@@ -15,7 +17,7 @@ def main(**kwargs):
     @ti.kernel
     def ti_funcs():
         # Attract single particle to a position with a mass and radius
-        tv.v.attract_particle(tv.p.field[0], [tv.x/2, tv.y/2], 10.0, tv.y)
+        tv.v.attract_particle(tv.p.field[0], [tv.x / 2, tv.y / 2], 10.0, tv.y)
 
         # Repel single particle from a position with a mass and radius
         # tv.v.repel_particle(tv.p.field[0], [tv.x/2, tv.y/2], 10.0, tv.y)
@@ -23,10 +25,10 @@ def main(**kwargs):
     @tv.render
     def _():
         tv.px.diffuse(0.99)
-        
+
         # Update position based on velocity
         tv.v.move(tv.p)
-        
+
         # Attract particles to a position with a mass and radius
         # tv.v.attract(tv.p, [tv.x/2, tv.y/2], 10.0, tv.y)
 
@@ -53,5 +55,6 @@ def main(**kwargs):
         tv.px.particles(tv.p, tv.s.species())
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)

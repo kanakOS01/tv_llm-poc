@@ -1,5 +1,6 @@
 from tolvera import Tolvera, run
 
+
 def main(**kwargs):
     tv = Tolvera(**kwargs)
 
@@ -9,5 +10,6 @@ def main(**kwargs):
         tv.px.set(tv.v.rd())
         return tv.px
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(main)
