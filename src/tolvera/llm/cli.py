@@ -13,13 +13,22 @@ console = Console()
 @app.command()
 def chat():
     """Chat with Tolvera in an interactive session."""
-    console.print(Panel("[bold cyan]Chat with Tolvera![/bold cyan] Type '[bold red]/exit[/bold red]' to quit.", style="bold green"))
+    console.print(Panel(
+        """[bold cyan]Chat with Tolvera![/bold cyan]
+        
+[bold violet]Commands - [/bold violet]
+    Type '[bold red]/run[/bold red]' to run the generated code.
+    Type '[bold red]/clear[/bold red]' to clear screen.
+    Type '[bold red]/exit[/bold red]' to quit.""", 
+        style="green")
+    )
     
     while True:
         try:
             user_input = Prompt.ask("\n[bold yellow]┃ You[/bold yellow]")  # Get user input
             
             if user_input.lower() == "/exit":
+                console.print()
                 console.print(Panel("[bold red]Goodbye![/bold red] 👋", style="bold magenta"))
                 break
             
