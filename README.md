@@ -1,5 +1,4 @@
-Demo with streamlit (Rudimentary version, works because the rect.py example has been given)
+CLI Demo with Typer (Hardcode AI response)
 
-
-https://github.com/user-attachments/assets/daa31f21-2f29-4a92-84eb-efd32cd661db
+https://github.com/user-attachments/assets/59b332e8-5e1c-4099-b908-e441338a3fd7
 
