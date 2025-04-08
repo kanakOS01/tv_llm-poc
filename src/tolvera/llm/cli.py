@@ -1,14 +1,15 @@
+import openai
 import typer
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.prompt import Prompt
 
-from .models.openai import OpenAILLM
+from .models.openai_llm import OpenAILLM
 
 app = typer.Typer()
 console = Console()
-
+openai_llm = OpenAILLM()
 
 @app.command()
 def chat():
@@ -23,6 +24,7 @@ def chat():
         style="green")
     )
     
+    response = ""
     while True:
         try:
             user_input = Prompt.ask("\n[bold yellow]┃ You[/bold yellow]")
@@ -32,21 +34,13 @@ def chat():
                 console.print(Panel("[bold red]Goodbye![/bold red] 👋", style="bold magenta"))
                 break
             
-            response = OpenAILLM().generate(user_input)
-#             response = """**Tolvera** is a Python library designed for composing and interacting with basal agencies.  
-# It is inspired by **artificial life (ALife)** and **self-organizing systems**, allowing users to create complex simulations with simple rules.
-
-# Example usage:  
-# ```python
-# from tolvera import Tolvera, run
-
-# def main(**kwargs):
-#     tv = Tolvera(**kwargs)
-#     tv.run()
-# ```"""
             
             console.print("\n[bold cyan]┃ Tolvera:[/bold cyan]", end=" ", style="bold cyan")
-            console.print(Markdown(response)) 
+            for chunk in openai_llm.generate(user_input):
+                console.print(chunk, end="")
+
+            
+            console.print(response)
 
         except KeyboardInterrupt:
             console.print("\n[bold red]Session interrupted. Exiting...[/bold red] 🚪")
