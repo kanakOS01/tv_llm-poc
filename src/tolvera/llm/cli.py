@@ -3,8 +3,8 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.prompt import Prompt
-from rich.text import Text
 
+from .models.openai import OpenAILLM
 
 app = typer.Typer()
 console = Console()
@@ -25,26 +25,26 @@ def chat():
     
     while True:
         try:
-            user_input = Prompt.ask("\n[bold yellow]┃ You[/bold yellow]")  # Get user input
+            user_input = Prompt.ask("\n[bold yellow]┃ You[/bold yellow]")
             
             if user_input.lower() == "/exit":
                 console.print()
                 console.print(Panel("[bold red]Goodbye![/bold red] 👋", style="bold magenta"))
                 break
             
-            response = """**Tolvera** is a Python library designed for composing and interacting with basal agencies.  
-It is inspired by **artificial life (ALife)** and **self-organizing systems**, allowing users to create complex simulations with simple rules.
+            response = OpenAILLM().generate(user_input)
+#             response = """**Tolvera** is a Python library designed for composing and interacting with basal agencies.  
+# It is inspired by **artificial life (ALife)** and **self-organizing systems**, allowing users to create complex simulations with simple rules.
 
-Example usage:  
-```python
-from tolvera import Tolvera, run
+# Example usage:  
+# ```python
+# from tolvera import Tolvera, run
 
-def main(**kwargs):
-    tv = Tolvera(**kwargs)
-    tv.run()
-```"""
+# def main(**kwargs):
+#     tv = Tolvera(**kwargs)
+#     tv.run()
+# ```"""
             
-            # Display response inside a panel with markdown formatting
             console.print("\n[bold cyan]┃ Tolvera:[/bold cyan]", end=" ", style="bold cyan")
             console.print(Markdown(response)) 
 
