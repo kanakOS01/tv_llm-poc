@@ -40,7 +40,7 @@ def chat():
                 console.print(chunk, end="")
 
             
-            console.print(response)
+            # console.print(response)
 
         except KeyboardInterrupt:
             console.print("\n[bold red]Session interrupted. Exiting...[/bold red] 🚪")
