@@ -1,7 +1,7 @@
 import taichi as ti
 from sardine_core.run import *
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 tv = Tolvera(iml=True)
 

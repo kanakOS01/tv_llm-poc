@@ -5,7 +5,7 @@ Same as `draw_sinewave.py` but loads an audio file and draws its waveform.
 import taichi as ti
 from signalflow import *
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

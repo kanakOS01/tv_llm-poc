@@ -13,7 +13,7 @@ to draw the sine wave in. We could also allow the user to specify the color of t
 import taichi as ti
 from signalflow import *
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

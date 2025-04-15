@@ -5,7 +5,7 @@ Trigger a Buffer when any particle crosses the center of the screen.
 import taichi as ti
 from signalflow import *
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

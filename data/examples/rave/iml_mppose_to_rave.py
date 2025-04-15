@@ -12,7 +12,7 @@ import sounddevice as sd
 import torch
 from iipyper import Audio
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 from tolvera.utils import map_range
 
 

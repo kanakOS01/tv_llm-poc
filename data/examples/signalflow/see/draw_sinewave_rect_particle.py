@@ -5,7 +5,7 @@ Draw a sinewave in XY mode inside a rectangle tracking a particle
 import taichi as ti
 from signalflow import *
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

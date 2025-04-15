@@ -9,7 +9,7 @@ Example
   $ python iml_flock_particles_to_species.py --iml True
 """
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

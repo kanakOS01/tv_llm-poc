@@ -6,7 +6,7 @@ The left half of the screen shows the left channel and the right half shows the 
 import taichi as ti
 from signalflow import *
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

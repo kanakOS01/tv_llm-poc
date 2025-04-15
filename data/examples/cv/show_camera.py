@@ -4,7 +4,7 @@ Example:
     $ python tolvera/cv/show_camera.py --cv True --camera True --device 0
 """
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

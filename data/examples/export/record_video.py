@@ -7,7 +7,7 @@ Example:
     python record_video.py --f=16 --r=4 --c=0 --w=512 --h=512 --output_dir='./output' --filename='output' --automatic_build=True --build_mp4=True --build_gif=False --clean_frames=True
 """
 
-from tolvera import Tolvera, VideoRecorder, run
+from tolvera_poc import Tolvera, VideoRecorder, run
 
 
 def main(**kwargs):

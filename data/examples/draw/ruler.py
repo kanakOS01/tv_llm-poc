@@ -2,7 +2,7 @@ import numpy as np
 import taichi as ti
 from PIL import Image, ImageDraw, ImageFont
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 from tolvera.pixels import Pixels
 
 

@@ -2,7 +2,7 @@
 
 This parameter will scale the behaviour to give additional control."""
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

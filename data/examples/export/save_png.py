@@ -1,6 +1,6 @@
 import taichi as ti
 
-from tolvera import FrameRecorder, Tolvera, run
+from tolvera_poc import FrameRecorder, Tolvera, run
 
 
 def main(**kwargs):

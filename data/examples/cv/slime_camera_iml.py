@@ -4,7 +4,7 @@ Example:
     $ python tolvera/cv/slime_camera_iml.py --cv True --camera True --device 0 --iml True
 """
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

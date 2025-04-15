@@ -8,7 +8,7 @@ Some are @ti.func which can only be called from @ti.kernel functions, or other @
 
 import taichi as ti
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

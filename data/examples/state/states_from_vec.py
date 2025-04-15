@@ -8,7 +8,7 @@ Example
 
 import fire
 
-from tolvera import Tolvera
+from tolvera_poc import Tolvera
 
 
 def main(**kwargs):

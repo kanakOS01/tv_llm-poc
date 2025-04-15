@@ -5,7 +5,7 @@ Draws a stereo sine wave as an XY Lissajous curve.
 import taichi as ti
 from signalflow import *
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 
 
 def main(**kwargs):

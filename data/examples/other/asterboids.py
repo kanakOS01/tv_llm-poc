@@ -7,7 +7,7 @@ X: shoot.
 
 import taichi as ti
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 from tolvera.dualsense import DualSense
 from tolvera.utils import map_range
 

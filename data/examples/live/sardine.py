@@ -12,7 +12,7 @@ evaluate the code below block-by-block using shift+enter.
 import taichi as ti
 from sardine_core.run import *
 
-from tolvera import Tolvera
+from tolvera_poc import Tolvera
 
 tv = Tolvera()
 

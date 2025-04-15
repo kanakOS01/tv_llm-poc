@@ -1,7 +1,7 @@
 import numpy as np
 from signalflow import *
 
-from tolvera import Tolvera, run
+from tolvera_poc import Tolvera, run
 from tolvera.osc.update import Updater
 from tolvera.utils import map_range
 
