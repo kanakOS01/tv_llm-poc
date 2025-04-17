@@ -1,4 +1,4 @@
-CLI Demo with Typer (Hardcoded AI response)
+CLI Demo with Typer (with AI response)
 
-https://github.com/user-attachments/assets/59b332e8-5e1c-4099-b908-e441338a3fd7
+https://github.com/user-attachments/assets/0356ff46-223a-4681-9d04-81c30be2d12c
 
