@@ -67,7 +67,7 @@ def chat():
             #     console.print(chunk, end="")
             #     response += chunk
             # console.print()
-            with console.status("[bold cyan]Thinking...[/bold cyan]", spinner="dots"):
+            with console.status("[bold cyan]Thinking...[/bold cyan]", spinner="dots10"):
                 response = openai_llm.generate(user_input).strip()
 
             console.print("[bold cyan]┃ Tolvera:[/bold cyan]", end=" ")
