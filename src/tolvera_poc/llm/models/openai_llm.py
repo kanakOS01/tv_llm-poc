@@ -36,7 +36,19 @@ class OpenAILLM(BaseLLM):
             max_retries=2,
         )
 
+
     def generate(self, prompt):
+        """Generate AI response using OpenAI API."""
+        response = self.client.responses.create(
+            model="gpt-4o-mini",
+            instructions=BASE_PROMPT,
+            input=prompt,
+        )
+
+        return response.output_text
+
+
+    def generate_with_streaming(self, prompt):
         """Generate response using OpenAI API."""
         response = self.client.responses.create(
             model="gpt-4o-mini",

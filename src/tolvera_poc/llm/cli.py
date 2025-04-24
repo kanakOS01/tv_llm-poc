@@ -1,10 +1,9 @@
-import code
-import openai
 import typer
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.prompt import Prompt
+from rich.status import Status
 
 from .models.openai_llm import OpenAILLM
 from .executor import CodeExecutor
@@ -36,36 +35,43 @@ def chat():
     generated_code_snippets = []
 
     while True:
-        response = ""
         try:
-            user_input = Prompt.ask("\n[bold yellow]┃ You[/bold yellow]")
+            console.print()  # Single newline at the start of each interaction
+            user_input = Prompt.ask("[bold yellow]┃ You[/bold yellow]")
+            console.print()
 
-            if user_input.lower() == "/exit":
-                console.print()
-                console.print(Panel("[bold red]Goodbye![/bold red] 👋", style="bold magenta"))
-                break
+            match user_input.lower():
+                case "/exit":
+                    console.print(Panel("[bold red]Goodbye![/bold red] 👋", style="bold magenta"))
+                    break
 
-            elif user_input.lower() == "/clear":
-                console.clear()
-                console.print(Panel(USER_INSTRUCTIONS, style="green"))
-                continue
-
-            elif user_input.lower() == "/run":
-                if not generated_code_snippets:
-                    console.print("[bold red]No code snippets generated yet![/bold red]")
+                case "/clear":
+                    console.clear()
+                    console.print(Panel(USER_INSTRUCTIONS, style="green"))
                     continue
-                console.print("\n[bold green]Running the last generated code...[/bold green]")
-                code = generated_code_snippets[-1]
-                result = code_executor.save_and_execute(code)
-                console.print(Markdown(result))
-                continue
+
+                case "/run":
+                    if not generated_code_snippets:
+                        console.print("[bold red]No code snippets generated yet![/bold red]")
+                        continue
+                    console.print("[bold green]Running the last generated code...[/bold green]")
+                    code = generated_code_snippets[-1]
+                    with console.status("[bold green]Running your code...[/bold green]", spinner="dots"):
+                        result = code_executor.save_and_execute(code)
+                    console.print(Markdown(result))
+                    continue
 
             # Generate LLM response
-            console.print("\n[bold cyan]┃ Tolvera:[/bold cyan]", end=" ", style="bold cyan")
-            for chunk in openai_llm.generate(user_input):
-                console.print(chunk, end="")
-                response += chunk
-            console.print()
+            # console.print("\n[bold cyan]┃ Tolvera:[/bold cyan]", end=" ", style="bold cyan")
+            # for chunk in openai_llm.generate(user_input):
+            #     console.print(chunk, end="")
+            #     response += chunk
+            # console.print()
+            with console.status("[bold cyan]Thinking...[/bold cyan]", spinner="dots"):
+                response = openai_llm.generate(user_input).strip()
+
+            console.print("[bold cyan]┃ Tolvera:[/bold cyan]", end=" ")
+            console.print(Markdown(response), end="")
 
             # Extract code if present
             code_snippet = get_code_from_response(response)

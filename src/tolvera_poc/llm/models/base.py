@@ -9,9 +9,14 @@ class BaseLLM(ABC):
         self.tokenizer = None
         self.device = None
     
+
     @abstractmethod
     def generate(self, prompt: str) -> str:
-        """Generate text based on the provided prompt."""
+        """Generate AI response."""
         pass
 
-    
+
+    @abstractmethod
+    def generate_with_streaming(self, prompt: str):
+        """Generate AI response with streaming."""
+        pass
